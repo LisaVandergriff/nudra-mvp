@@ -142,7 +142,9 @@ if (isReply) {
   ];
 
   let html = `
-    <div class="section-title">Alright… your turn 😏</div>
+    <h1>Alright… your turn 😏</h1>
+
+    <div id="result">
   `;
 
   responses.forEach((opt, index) => {
@@ -153,7 +155,11 @@ if (isReply) {
     `;
   });
 
-  document.getElementById("result").innerHTML = html;
+  html += `</div>`;
+
+  // 🔥 THIS is the key difference
+  document.body.innerHTML = html;
+
   window.dateNightOptions = responses;
 }
 
