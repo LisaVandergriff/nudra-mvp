@@ -56,12 +56,7 @@
   </style>
 </head>
 
-
 <body>
-
-<!-- ============================= -->
-<!-- 🧠 MAIN SENDER UI (YOU SEE THIS) -->
-<!-- ============================= -->
 
 <h1>So… what kind of trouble are we getting into?</h1>
 <p>Pick a mood. I’ll take it from there.</p>
@@ -73,71 +68,110 @@
 
 <div id="result">Go on… pick something.</div>
 
-
-
 <script>
 
-// =============================
-// 🔧 CORE UTILITY
-// =============================
+////////////////////////////////////////////////////////////
+// 🔧 HELPER
+////////////////////////////////////////////////////////////
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-
-
-// =============================
-// 📥 RECEIVER MODE (JENN)
-// If link contains ?msg=
-// =============================
+////////////////////////////////////////////////////////////
+// 🔍 URL STATE HANDLING
+////////////////////////////////////////////////////////////
 const params = new URLSearchParams(window.location.search);
-const incoming = params.get("msg");
 
-if (incoming) {
+const incoming = params.get("msg");     // message received
+const isReply  = params.get("reply");   // user said YES
+const isDecline = params.get("decline");// user said NO
+
+////////////////////////////////////////////////////////////
+// 📩 INCOMING MESSAGE (JENN VIEW)
+////////////////////////////////////////////////////////////
+if (incoming && !isReply && !isDecline) {
 
   document.body.innerHTML = `
-    <h1 style="opacity:0.8;">Psst…</h1>
+    <h1>Psst…</h1>
 
     <div id="result">
-      <div style="font-size:18px; color:#aaa;">Someone’s thinking about you.</div>
+
+      <div style="font-size:18px; color:#aaa;">
+        Someone’s thinking about you.
+      </div>
 
       <div style="font-size:42px; margin-top:30px;">
         ${decodeURIComponent(incoming)}
       </div>
 
-      <div class="tone">
-        …and they didn’t overthink it.
+      <div class="tone" style="margin-top:20px;">
+        So… do you wanna play?
       </div>
+
+      <br>
+
+      <a href="?reply=true" class="button">
+        Why yes I do
+      </a>
+
+      <a href="?decline=true&msg=${encodeURIComponent(incoming)}" class="button">
+        Not now
+      </a>
+
     </div>
   `;
 
-  throw new Error("stop"); // ✅ THIS instead of return
+  throw new Error("stop");
 }
 
+////////////////////////////////////////////////////////////
+// 👍 REPLY = YES (JENN BECOMES SENDER)
+////////////////////////////////////////////////////////////
+if (isReply) {
+  document.getElementById("result").innerHTML = "Pick your move…";
+  dateNightMode();
+}
 
-  
-// =============================
+////////////////////////////////////////////////////////////
+// 👎 DECLINE = NO (SEND POLITE MESSAGE BACK)
+////////////////////////////////////////////////////////////
+if (isDecline) {
+
+  const polite = "Not tonight… but don’t stop trying 😏";
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(polite)}`;
+
+  document.getElementById("result").innerHTML = `
+    <div>Fair enough… we’ll behave (for now).</div>
+
+    <br><br>
+
+    <a href="sms:?body=${encodeURIComponent(polite + ' ' + link)}" class="button">
+      Send response
+    </a>
+
+    <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(polite + '\n\n' + link)}" class="button">
+      Email response
+    </a>
+  `;
+}
+
+////////////////////////////////////////////////////////////
 // 🍝 DINNER MODE
-// =============================
+////////////////////////////////////////////////////////////
 function dinnerMode() {
-
   const actions = ["Go out", "Order takeout", "Cook at home", "Quick meal", "Leftovers", "Try something new"];
   const cuisines = ["Italian", "Mexican", "Chinese", "Japanese", "American", "Mediterranean", "Comfort food"];
   const tones = ["no arguing.", "you know what you’re doing.", "keep it simple.", "just go with it.", "don’t overthink it."];
 
   const result = pick(actions) + ". " + pick(cuisines) + ".";
-
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
 
-
-
-// =============================
+////////////////////////////////////////////////////////////
 // 🖤 DATE NIGHT MODE
-// =============================
+////////////////////////////////////////////////////////////
 function dateNightMode() {
-
   const options = [
     "You’ve had my attention all day.",
     "Tonight doesn’t need a plan.",
@@ -155,22 +189,16 @@ function dateNightMode() {
   });
 
   document.getElementById("result").innerHTML = html;
-
-  // store choices globally
   window.dateNightOptions = options;
 }
 
-
-
-// =============================
+////////////////////////////////////////////////////////////
 // 🚀 SEND ACTION (YOU → JENN)
-// =============================
+////////////////////////////////////////////////////////////
 function sendChoice(index) {
 
   const text = window.dateNightOptions[index];
-
-  // 🔗 Link Jenn will click
-  const link = "https://nudra-mvp.vercel.app/?msg=" + encodeURIComponent(text);
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
   document.getElementById("result").innerHTML = "Sending to your person…";
 
@@ -179,38 +207,27 @@ function sendChoice(index) {
     document.getElementById("result").innerHTML =
       "Showing your brave side, I see.<br>" +
       '<span class="tone">' + text + '</span>' +
+      `<br><br>
 
-      "<br><br>" +
+       <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
+         Text Jenn
+       </a>
 
-      // 📱 TEXT
-      `<a href="sms:?body=${encodeURIComponent(text + " 😏 " + link)}" class="button">
-        Text Jenn
-      </a>`
+       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" class="button">
+         Email Jenn
+       </a>
 
-      +
-
-      // 📧 EMAIL
-      `<a href="mailto:jennifer12555@gmail.com?subject=Nudra 😏&body=${encodeURIComponent(text + "\n\n" + link)}" class="button">
-        Email Jenn
-      </a>`
-
-      +
-
-      // 💼 OUTLOOK
-      `<a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=Nudra 😏&body=${encodeURIComponent(text + "\n\n" + link)}" target="_blank" class="button">
-        Outlook Jenn
-      </a>`;
+       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" target="_blank" class="button">
+         Outlook Jenn
+       </a>`;
 
   }, 1200);
 }
 
-
-
-// =============================
+////////////////////////////////////////////////////////////
 // 🎲 FATE MODE
-// =============================
+////////////////////////////////////////////////////////////
 function fateMode() {
-
   const chaos = [
     "Flip a coin and commit",
     "First place you both think of wins",
@@ -228,18 +245,14 @@ function fateMode() {
   ];
 
   const result = pick(chaos) + ".";
-
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
 
-
-
-// =============================
+////////////////////////////////////////////////////////////
 // 💬 RECONNECT MODE
-// =============================
+////////////////////////////////////////////////////////////
 function reconnectMode() {
-
   const prompts = [
     "Ask: what’s been on your mind lately?",
     "Talk about your favorite memory together",
@@ -257,7 +270,6 @@ function reconnectMode() {
   ];
 
   const result = pick(prompts);
-
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
