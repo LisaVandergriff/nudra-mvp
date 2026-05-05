@@ -1,18 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nudra</title>
+
+  <style>
+    body {
+      background: #000;
+      color: #E6D2C6;
+      font-family: Georgia, serif;
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      margin-bottom: 40px;
+      color: #ccc;
+    }
+
+    .button {
+      display: block;
+      width: 260px;
+      margin: 10px auto;
+      padding: 14px;
+      border-radius: 999px;
+      border: none;
+      background: #E6D2C6;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+    }
+
+    #result {
+      margin-top: 40px;
+      font-size: 26px;
+      line-height: 1.4;
+    }
+
+    .tone {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      font-style: italic;
+      color: #aaa;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+
+
+<body>
+
+<!-- ============================= -->
+<!-- 🧠 MAIN SENDER UI (YOU SEE THIS) -->
+<!-- ============================= -->
+
+<h1>So… what kind of trouble are we getting into?</h1>
+<p>Pick a mood. I’ll take it from there.</p>
+
+<button class="button" onclick="dinnerMode()">🍽️ Dinner / Easy Night</button>
+<button class="button" onclick="dateNightMode()">🖤 Date Night</button>
+<button class="button" onclick="fateMode()">🎲 Let the Fates Decide</button>
+<button class="button" onclick="reconnectMode()">💬 Reconnect</button>
+
+<div id="result">Go on… pick something.</div>
+
+
+
 <script>
 
 // =============================
-// 🔧 CORE UTILITY FUNCTIONS
-// =============================
-function pick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
-
-
-
-<script>
-
-// =============================
-// 🔧 CORE UTILITY FUNCTIONS
+// 🔧 CORE UTILITY
 // =============================
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -22,43 +88,53 @@ function pick(list) {
 
 // =============================
 // 📥 RECEIVER MODE (JENN)
-// Triggered when link contains ?msg=
+// If link contains ?msg=
 // =============================
 const params = new URLSearchParams(window.location.search);
 const incoming = params.get("msg");
 
 if (incoming) {
+
   document.body.innerHTML = `
-    <h1>Psst… someone made a move. 😏</h1>
+    <h1 style="opacity:0.8;">Psst…</h1>
 
     <div id="result">
-      <div style="font-size:18px; color:#aaa;">Someone made a move...</div>
 
-      <div style="font-size:38px; margin-top:20px; line-height:1.3;">
+      <div style="font-size:18px; color:#aaa; margin-top:10px;">
+        Someone’s thinking about you.
+      </div>
+
+      <div style="font-size:42px; margin-top:30px; line-height:1.3;">
         ${decodeURIComponent(incoming)}
       </div>
 
-      <div class="tone" style="margin-top:15px;">
+      <div class="tone" style="margin-top:20px; font-size:16px;">
+        …and they didn’t overthink it.
+      </div>
+
+      <div style="margin-top:30px; font-size:14px; color:#888;">
         So… what are you going to do about it?
       </div>
+
     </div>
   `;
 
-  // ⛔ STOP the rest of the app from loading
-  throw new Error("Receiver mode only");
+  return; // 🔥 STOP here (no crash)
 }
 
 
 
 // =============================
-// 🍝 DINNER MODE (SENDER)
+// 🍝 DINNER MODE
 // =============================
 function dinnerMode() {
+
   const actions = ["Go out", "Order takeout", "Cook at home", "Quick meal", "Leftovers", "Try something new"];
   const cuisines = ["Italian", "Mexican", "Chinese", "Japanese", "American", "Mediterranean", "Comfort food"];
   const tones = ["no arguing.", "you know what you’re doing.", "keep it simple.", "just go with it.", "don’t overthink it."];
 
   const result = pick(actions) + ". " + pick(cuisines) + ".";
+
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
@@ -66,9 +142,10 @@ function dinnerMode() {
 
 
 // =============================
-// 🖤 DATE NIGHT MODE (SENDER)
+// 🖤 DATE NIGHT MODE
 // =============================
 function dateNightMode() {
+
   const options = [
     "You’ve had my attention all day.",
     "Tonight doesn’t need a plan.",
@@ -79,60 +156,69 @@ function dateNightMode() {
 
   options.forEach((opt, index) => {
     html += `
-      <button 
-        class="button" 
-        onclick="sendChoice(${index})">
+      <button class="button" onclick="sendChoice(${index})">
         ${opt}
       </button>
     `;
   });
 
   document.getElementById("result").innerHTML = html;
+
+  // store choices globally
   window.dateNightOptions = options;
 }
 
 
 
 // =============================
-// 🚀 SEND ACTION (BRIDGE: YOU → JENN)
+// 🚀 SEND ACTION (YOU → JENN)
 // =============================
 function sendChoice(index) {
+
   const text = window.dateNightOptions[index];
 
-  // 🔗 This creates the magic link Jenn receives
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
+  // 🔗 Link Jenn will click
+  const link = "https://nudra-mvp.vercel.app/?msg=" + encodeURIComponent(text);
 
   document.getElementById("result").innerHTML = "Sending to your person…";
 
   setTimeout(() => {
+
     document.getElementById("result").innerHTML =
       "Showing your brave side, I see.<br>" +
       '<span class="tone">' + text + '</span>' +
-      `<br><br>
 
-       <!-- 📱 SMS -->
-       <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
-         Text Jenn
-       </a>
+      "<br><br>" +
 
-       <!-- 📧 Email -->
-       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" class="button">
-         Email Jenn
-       </a>
+      // 📱 TEXT
+      `<a href="sms:?body=${encodeURIComponent(text + " 😏 " + link)}" class="button">
+        Text Jenn
+      </a>`
 
-       <!-- 💼 Outlook -->
-       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" target="_blank" class="button">
-         Outlook Jenn
-       </a>`;
+      +
+
+      // 📧 EMAIL
+      `<a href="mailto:jennifer12555@gmail.com?subject=Nudra 😏&body=${encodeURIComponent(text + "\n\n" + link)}" class="button">
+        Email Jenn
+      </a>`
+
+      +
+
+      // 💼 OUTLOOK
+      `<a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=Nudra 😏&body=${encodeURIComponent(text + "\n\n" + link)}" target="_blank" class="button">
+        Outlook Jenn
+      </a>`;
+
   }, 1200);
 }
 
 
 
 // =============================
-// 🎲 FATE MODE (SENDER)
+// 🎲 FATE MODE
 // =============================
 function fateMode() {
+
   const chaos = [
     "Flip a coin and commit",
     "First place you both think of wins",
@@ -150,6 +236,7 @@ function fateMode() {
   ];
 
   const result = pick(chaos) + ".";
+
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
@@ -157,9 +244,10 @@ function fateMode() {
 
 
 // =============================
-// 💬 RECONNECT MODE (SENDER)
+// 💬 RECONNECT MODE
 // =============================
 function reconnectMode() {
+
   const prompts = [
     "Ask: what’s been on your mind lately?",
     "Talk about your favorite memory together",
@@ -177,143 +265,12 @@ function reconnectMode() {
   ];
 
   const result = pick(prompts);
+
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
 
 </script>
 
-
-
-// =============================
-// 🍝 DINNER MODE (SENDER)
-// =============================
-function dinnerMode() {
-  const actions = ["Go out", "Order takeout", "Cook at home", "Quick meal", "Leftovers", "Try something new"];
-  const cuisines = ["Italian", "Mexican", "Chinese", "Japanese", "American", "Mediterranean", "Comfort food"];
-  const tones = ["no arguing.", "you know what you’re doing.", "keep it simple.", "just go with it.", "don’t overthink it."];
-
-  const result = pick(actions) + ". " + pick(cuisines) + ".";
-  document.getElementById("result").innerHTML =
-    result + '<span class="tone">' + pick(tones) + '</span>';
-}
-
-
-
-// =============================
-// 🖤 DATE NIGHT MODE (SENDER)
-// =============================
-function dateNightMode() {
-  const options = [
-    "You’ve had my attention all day.",
-    "Tonight doesn’t need a plan.",
-    "Don’t make me overthink this."
-  ];
-
-  let html = "<div>Pick your move...</div><br>";
-
-  options.forEach((opt, index) => {
-    html += `
-      <button 
-        class="button" 
-        onclick="sendChoice(${index})">
-        ${opt}
-      </button>
-    `;
-  });
-
-  document.getElementById("result").innerHTML = html;
-  window.dateNightOptions = options;
-}
-
-
-
-// =============================
-// 🚀 SEND ACTION (BRIDGE: YOU → JENN)
-// =============================
-function sendChoice(index) {
-  const text = window.dateNightOptions[index];
-
-  // 🔗 This creates the magic link Jenn receives
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
-
-  document.getElementById("result").innerHTML = "Sending to your person…";
-
-  setTimeout(() => {
-    document.getElementById("result").innerHTML =
-      "Showing your brave side, I see.<br>" +
-      '<span class="tone">' + text + '</span>' +
-      `<br><br>
-
-       <!-- 📱 SMS -->
-       <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
-         Text Jenn
-       </a>
-
-       <!-- 📧 Email -->
-       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" class="button">
-         Email Jenn
-       </a>
-
-       <!-- 💼 Outlook -->
-       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" target="_blank" class="button">
-         Outlook Jenn
-       </a>`;
-  }, 1200);
-}
-
-
-
-// =============================
-// 🎲 FATE MODE (SENDER)
-// =============================
-function fateMode() {
-  const chaos = [
-    "Flip a coin and commit",
-    "First place you both think of wins",
-    "Ask a stranger. Seriously.",
-    "Close your eyes and point at a map",
-    "Let the other person decide completely"
-  ];
-
-  const tones = [
-    "no backing out.",
-    "you agreed to this.",
-    "trust the chaos.",
-    "this is happening.",
-    "don’t question it."
-  ];
-
-  const result = pick(chaos) + ".";
-  document.getElementById("result").innerHTML =
-    result + '<span class="tone">' + pick(tones) + '</span>';
-}
-
-
-
-// =============================
-// 💬 RECONNECT MODE (SENDER)
-// =============================
-function reconnectMode() {
-  const prompts = [
-    "Ask: what’s been on your mind lately?",
-    "Talk about your favorite memory together",
-    "Say something you haven’t said in a while",
-    "Ask what they need more of right now",
-    "Sit together and just be for a minute"
-  ];
-
-  const tones = [
-    "take your time.",
-    "be honest.",
-    "no distractions.",
-    "just listen.",
-    "this one matters."
-  ];
-
-  const result = pick(prompts);
-  document.getElementById("result").innerHTML =
-    result + '<span class="tone">' + pick(tones) + '</span>';
-}
-
-</script>
+</body>
+</html>
