@@ -128,8 +128,25 @@ if (incoming && !isReply && !isDecline) {
 // 👍 REPLY = YES (JENN BECOMES SENDER)
 ////////////////////////////////////////////////////////////
 if (isReply) {
-  document.getElementById("result").innerHTML = "Pick your move…";
-  dateNightMode();
+
+  const responses = [
+    "Careful… I might take you up on that.",
+    "Alright… but you’re making the first move.",
+    "You started this. Don’t disappear now."
+  ];
+
+  let html = "<div>Alright… your turn 😏</div><br>";
+
+  responses.forEach((opt, index) => {
+    html += `
+      <button class="button" onclick="sendChoice(${index})">
+        ${opt}
+      </button>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = html;
+  window.dateNightOptions = responses; // reuse send logic
 }
 
 ////////////////////////////////////////////////////////////
