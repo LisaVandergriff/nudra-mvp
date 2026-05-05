@@ -3,11 +3,14 @@
 <head>
   <title>Nudra</title>
 
-  <!-- Mobile scaling -->
+  <!-- MOBILE SCALING -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* ===== Base layout ===== */
+    /* =========================
+       BASE STYLES
+    ========================= */
+
     body {
       background: #000;
       color: #E6D2C6;
@@ -28,7 +31,10 @@
       color: #ccc;
     }
 
-    /* ===== Buttons ===== */
+    /* =========================
+       BUTTONS
+    ========================= */
+
     .button {
       display: block;
       width: 90%;
@@ -45,7 +51,10 @@
       font-family: Arial, sans-serif;
     }
 
-    /* ===== Dynamic content area ===== */
+    /* =========================
+       TEXT AREAS
+    ========================= */
+
     #result {
       margin-top: 30px;
       font-size: clamp(20px, 5vw, 30px);
@@ -78,12 +87,16 @@
       margin-top: 10px;
       font-family: Arial, sans-serif;
     }
+
   </style>
 </head>
 
 <body>
 
-<!-- ===== HOME SCREEN ===== -->
+<!-- =========================
+     HOME SCREEN
+========================= -->
+
 <h1>So… what kind of trouble are we getting into?</h1>
 <p>Pick a mood. I’ll take it from there.</p>
 
@@ -96,29 +109,35 @@
 
 <script>
 
-/* ===== Utility: random picker ===== */
+////////////////////////////////////////////////////////////
+// HELPER FUNCTION
+////////////////////////////////////////////////////////////
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-/* ===== Read URL state ===== */
+////////////////////////////////////////////////////////////
+// URL PARAMS (DRIVES FLOW STATE)
+////////////////////////////////////////////////////////////
 const params = new URLSearchParams(window.location.search);
 
-const incoming = params.get("msg");     // message received
-const isReply  = params.get("reply");   // user chose YES
-const isDecline = params.get("decline");// user chose NO
+const incoming = params.get("msg");     // incoming message
+const isReply  = params.get("reply");   // YES flow
+const isDecline = params.get("decline");// NO flow
 
-/* =========================================================
-   INCOMING MESSAGE VIEW
-   (Receiver sees this when opening a shared link)
-========================================================= */
+////////////////////////////////////////////////////////////
+// INCOMING MESSAGE VIEW
+////////////////////////////////////////////////////////////
 if (incoming && !isReply && !isDecline) {
 
   document.body.innerHTML = `
     <h1>Psst…</h1>
 
     <div id="result">
-      <div class="subtle">Someone’s thinking about you.</div>
+
+      <div class="subtle">
+        Someone’s thinking about you.
+      </div>
 
       <div class="hero">
         ${decodeURIComponent(incoming)}
@@ -132,16 +151,16 @@ if (incoming && !isReply && !isDecline) {
 
       <a href="?reply=true" class="button">Why yes I do</a>
       <a href="?decline=true&msg=${encodeURIComponent(incoming)}" class="button">Not now</a>
+
     </div>
   `;
 
-  throw new Error("stop further execution");
+  throw new Error("stop execution");
 }
 
-/* =========================================================
-   YES FLOW
-   (Receiver accepts and becomes the next sender)
-========================================================= */
+////////////////////////////////////////////////////////////
+// YES FLOW (CONTINUE LOOP)
+////////////////////////////////////////////////////////////
 if (isReply) {
 
   const responses = [
@@ -166,26 +185,23 @@ if (isReply) {
   html += `</div>`;
 
   document.body.innerHTML = html;
-
-  // store options globally for reuse
-  window.dateNightOptions = responses;
+  window.currentOptions = responses;
 }
 
-/* =========================================================
-   NO FLOW
-   (Soft decline, but still keeps loop alive)
-========================================================= */
+////////////////////////////////////////////////////////////
+// NO FLOW (POLITE EXIT BUT LOOPABLE)
+////////////////////////////////////////////////////////////
 if (isDecline) {
 
   const polite = "Not tonight… but don’t stop trying 😏";
-
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(polite)}`;
-  const fullMessage = polite + " " + link;
+  const fullMessage = `${polite}\n${link}`;
 
   document.body.innerHTML = `
     <h1>Fair enough…</h1>
 
     <div id="result">
+
       <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">
         Send it
       </a>
@@ -194,18 +210,17 @@ if (isDecline) {
         Email it
       </a>
 
-      <button class="button" onclick="copyMessage()">
+      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">
         Copy
       </button>
+
     </div>
   `;
-
-  window._nudraMessage = fullMessage;
 }
 
-/* =========================================================
-   DATE NIGHT START
-========================================================= */
+////////////////////////////////////////////////////////////
+// DATE NIGHT MODE
+////////////////////////////////////////////////////////////
 function dateNightMode() {
 
   const options = [
@@ -214,7 +229,57 @@ function dateNightMode() {
     "Don’t make me overthink this."
   ];
 
-  let html = `<div class="section-title">Pick your move...</div>`;
+  renderOptions("Pick your move...", options);
+}
+
+////////////////////////////////////////////////////////////
+// DINNER MODE
+////////////////////////////////////////////////////////////
+function dinnerMode() {
+
+  const options = [
+    "Let’s not overthink this—pick a place.",
+    "You choose… I’ll make it worth it after.",
+    "Something easy… then we stay in 😏"
+  ];
+
+  renderOptions("What’s the plan?", options);
+}
+
+////////////////////////////////////////////////////////////
+// FATE MODE
+////////////////////////////////////////////////////////////
+function fateMode() {
+
+  const options = [
+    "No thinking—first idea wins.",
+    "Flip a coin and commit.",
+    "You decide. No take-backs."
+  ];
+
+  renderOptions("Let chaos decide…", options);
+}
+
+////////////////////////////////////////////////////////////
+// RECONNECT MODE
+////////////////////////////////////////////////////////////
+function reconnectMode() {
+
+  const options = [
+    "Come sit with me for a minute.",
+    "Tell me what’s been on your mind.",
+    "Let’s reset… just us."
+  ];
+
+  renderOptions("Slow it down…", options);
+}
+
+////////////////////////////////////////////////////////////
+// RENDER OPTIONS (SHARED UI)
+////////////////////////////////////////////////////////////
+function renderOptions(title, options) {
+
+  let html = `<div class="section-title">${title}</div>`;
 
   options.forEach((opt, index) => {
     html += `
@@ -225,26 +290,23 @@ function dateNightMode() {
   });
 
   document.getElementById("result").innerHTML = html;
-
-  window.dateNightOptions = options;
+  window.currentOptions = options;
 }
 
-/* =========================================================
-   SEND MESSAGE (core loop engine)
-   - Generates message + new link
-   - User sends via text/email manually
-========================================================= */
+////////////////////////////////////////////////////////////
+// SEND MESSAGE (CORE LOOP ENGINE)
+////////////////////////////////////////////////////////////
 function sendChoice(index) {
 
-  const text = window.dateNightOptions[index];
-
+  const text = window.currentOptions[index];
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
-  const fullMessage = `${text} 😏\n\n${link}`;
+  const fullMessage = `${text} 😏\n${link}`;
 
   document.body.innerHTML = `
     <h1>Showing your brave side, I see.</h1>
 
     <div id="result">
+
       <div class="tone">${text}</div>
 
       <br><br>
@@ -257,41 +319,24 @@ function sendChoice(index) {
         Email it
       </a>
 
-      <button class="button" onclick="copyMessage()">
+      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">
         Copy
       </button>
+
     </div>
   `;
-
-  window._nudraMessage = fullMessage;
 }
 
-/* =========================================================
-   COPY HELPER (for desktop/testing)
-========================================================= */
-function copyMessage() {
-  navigator.clipboard.writeText(window._nudraMessage);
-  alert("Copied — now paste it 😉");
-}
+////////////////////////////////////////////////////////////
+// COPY FUNCTION (FALLBACK UX WIN)
+////////////////////////////////////////////////////////////
+function copyMessage(encodedMessage) {
 
-/* =========================================================
-   OTHER MODES (simple placeholders)
-========================================================= */
-function dinnerMode() {
-  const actions = ["Go out", "Order takeout", "Cook at home"];
-  const cuisines = ["Italian", "Mexican", "Comfort food"];
-  const result = pick(actions) + ". " + pick(cuisines) + ".";
-  document.getElementById("result").innerHTML = result;
-}
+  const decoded = decodeURIComponent(encodedMessage);
 
-function fateMode() {
-  const chaos = ["Flip a coin", "Ask a stranger", "Close your eyes and pick"];
-  document.getElementById("result").innerHTML = pick(chaos);
-}
-
-function reconnectMode() {
-  const prompts = ["Ask what they need right now", "Share a memory"];
-  document.getElementById("result").innerHTML = pick(prompts);
+  navigator.clipboard.writeText(decoded).then(() => {
+    alert("Copied!");
+  });
 }
 
 </script>
