@@ -9,6 +9,17 @@ function pick(list) {
 
 
 
+<script>
+
+// =============================
+// 🔧 CORE UTILITY FUNCTIONS
+// =============================
+function pick(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+
+
 // =============================
 // 📥 RECEIVER MODE (JENN)
 // Triggered when link contains ?msg=
@@ -36,6 +47,141 @@ if (incoming) {
   // ⛔ STOP the rest of the app from loading
   throw new Error("Receiver mode only");
 }
+
+
+
+// =============================
+// 🍝 DINNER MODE (SENDER)
+// =============================
+function dinnerMode() {
+  const actions = ["Go out", "Order takeout", "Cook at home", "Quick meal", "Leftovers", "Try something new"];
+  const cuisines = ["Italian", "Mexican", "Chinese", "Japanese", "American", "Mediterranean", "Comfort food"];
+  const tones = ["no arguing.", "you know what you’re doing.", "keep it simple.", "just go with it.", "don’t overthink it."];
+
+  const result = pick(actions) + ". " + pick(cuisines) + ".";
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+
+
+
+// =============================
+// 🖤 DATE NIGHT MODE (SENDER)
+// =============================
+function dateNightMode() {
+  const options = [
+    "You’ve had my attention all day.",
+    "Tonight doesn’t need a plan.",
+    "Don’t make me overthink this."
+  ];
+
+  let html = "<div>Pick your move...</div><br>";
+
+  options.forEach((opt, index) => {
+    html += `
+      <button 
+        class="button" 
+        onclick="sendChoice(${index})">
+        ${opt}
+      </button>
+    `;
+  });
+
+  document.getElementById("result").innerHTML = html;
+  window.dateNightOptions = options;
+}
+
+
+
+// =============================
+// 🚀 SEND ACTION (BRIDGE: YOU → JENN)
+// =============================
+function sendChoice(index) {
+  const text = window.dateNightOptions[index];
+
+  // 🔗 This creates the magic link Jenn receives
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
+
+  document.getElementById("result").innerHTML = "Sending to your person…";
+
+  setTimeout(() => {
+    document.getElementById("result").innerHTML =
+      "Showing your brave side, I see.<br>" +
+      '<span class="tone">' + text + '</span>' +
+      `<br><br>
+
+       <!-- 📱 SMS -->
+       <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
+         Text Jenn
+       </a>
+
+       <!-- 📧 Email -->
+       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" class="button">
+         Email Jenn
+       </a>
+
+       <!-- 💼 Outlook -->
+       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" target="_blank" class="button">
+         Outlook Jenn
+       </a>`;
+  }, 1200);
+}
+
+
+
+// =============================
+// 🎲 FATE MODE (SENDER)
+// =============================
+function fateMode() {
+  const chaos = [
+    "Flip a coin and commit",
+    "First place you both think of wins",
+    "Ask a stranger. Seriously.",
+    "Close your eyes and point at a map",
+    "Let the other person decide completely"
+  ];
+
+  const tones = [
+    "no backing out.",
+    "you agreed to this.",
+    "trust the chaos.",
+    "this is happening.",
+    "don’t question it."
+  ];
+
+  const result = pick(chaos) + ".";
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+
+
+
+// =============================
+// 💬 RECONNECT MODE (SENDER)
+// =============================
+function reconnectMode() {
+  const prompts = [
+    "Ask: what’s been on your mind lately?",
+    "Talk about your favorite memory together",
+    "Say something you haven’t said in a while",
+    "Ask what they need more of right now",
+    "Sit together and just be for a minute"
+  ];
+
+  const tones = [
+    "take your time.",
+    "be honest.",
+    "no distractions.",
+    "just listen.",
+    "this one matters."
+  ];
+
+  const result = pick(prompts);
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+
+</script>
 
 
 
