@@ -88,19 +88,32 @@ function dateNightMode() {
     "Don’t make me overthink this."
   ];
 
-  let html = "<div>Pick your move…</div><br>";
+  let html = "<div>Pick your move...</div><br>";
 
-  options.forEach(opt => {
-   html += `<button style="padding:14px 28px; border-radius:999px; border:none; background:#E6D2C6; color:#000; font-size:16px; cursor:pointer; margin-bottom:12px;" onclick="sendChoice('${opt}')">${opt}</button><br>`;
+  options.forEach((opt, index) => {
+    html += `
+      <button 
+        class="button" 
+        onclick="sendChoice(${index})">
+        ${opt}
+      </button>
+    `;
+  });
 
   document.getElementById("result").innerHTML = html;
+
+  window.dateNightOptions = options;
 }
 
-function sendChoice(text) {
+function sendChoice(index) {
+  const text = window.dateNightOptions[index];
+
   document.getElementById("result").innerHTML = "Sending to your person…";
 
   setTimeout(() => {
-    document.getElementById("result").innerHTML = "Sent. Now we wait.";
+    document.getElementById("result").innerHTML =
+      "Sent. Now we wait." +
+      '<span class="tone">' + text + '</span>';
   }, 1200);
 }
   
