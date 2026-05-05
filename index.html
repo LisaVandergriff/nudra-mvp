@@ -281,6 +281,7 @@ function sendChoice(index) {
 
   const text = window.currentOptions[index];
   console.log("Message selected:", text);
+  console.log("📤 Ready to send:", fullMessage);
   track("message_selected", { text });
 
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
