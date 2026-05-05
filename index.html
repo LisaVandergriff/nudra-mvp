@@ -91,8 +91,7 @@ function dateNightMode() {
   let html = "<div>Pick your move…</div><br>";
 
   options.forEach(opt => {
-    html += `<button onclick="sendChoice('${opt}')">${opt}</button><br><br>`;
-  });
+   html += `<button style="padding:14px 28px; border-radius:999px; border:none; background:#E6D2C6; color:#000; font-size:16px; cursor:pointer; margin-bottom:12px;" onclick="sendChoice('${opt}')">${opt}</button><br>`;
 
   document.getElementById("result").innerHTML = html;
 }
