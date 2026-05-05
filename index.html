@@ -53,24 +53,12 @@
       color: #aaa;
       font-family: Arial, sans-serif;
     }
-    .hero {
-  font-size: 40px;
-  margin-top: 20px;
-  line-height: 1.3;
-}
 
-.subtle {
-  font-size: 16px;
-  color: #aaa;
-  margin-top: 10px;
-  font-family: Arial, sans-serif;
-}
-
-.section-title {
-  font-size: 22px;
-  margin-top: 40px;
-  color: #ccc;
-}
+    .section-title {
+      font-size: 22px;
+      margin-top: 40px;
+      color: #ccc;
+    }
   </style>
 </head>
 
@@ -89,23 +77,23 @@
 <script>
 
 ////////////////////////////////////////////////////////////
-// 🔧 HELPER
+// 🔧 HELPER FUNCTION
 ////////////////////////////////////////////////////////////
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
 ////////////////////////////////////////////////////////////
-// 🔍 URL STATE HANDLING
+// 🔍 URL PARAMS (THIS DRIVES THE ENTIRE FLOW)
 ////////////////////////////////////////////////////////////
 const params = new URLSearchParams(window.location.search);
 
-const incoming = params.get("msg");     // message received
-const isReply  = params.get("reply");   // user said YES
-const isDecline = params.get("decline");// user said NO
+const incoming = params.get("msg");     // original message
+const isReply  = params.get("reply");   // YES flow
+const isDecline = params.get("decline");// NO flow
 
 ////////////////////////////////////////////////////////////
-// 📩 INCOMING MESSAGE (JENN VIEW)
+// 📩 INCOMING MESSAGE VIEW (JENN SIDE)
 ////////////////////////////////////////////////////////////
 if (incoming && !isReply && !isDecline) {
 
@@ -139,11 +127,11 @@ if (incoming && !isReply && !isDecline) {
     </div>
   `;
 
-  throw new Error("stop");
+  throw new Error("stop execution");
 }
 
 ////////////////////////////////////////////////////////////
-// 👍 REPLY = YES (JENN BECOMES SENDER)
+// 👍 YES FLOW (JENN BECOMES SENDER)
 ////////////////////////////////////////////////////////////
 if (isReply) {
 
@@ -153,10 +141,10 @@ if (isReply) {
     "You started this. Don’t disappear now."
   ];
 
-  let html = "<div>Alright… your turn 😏</div><br>";let html = `
-  <div class="section-title">Alright… your turn 😏</div>
-`;
-  
+  let html = `
+    <div class="section-title">Alright… your turn 😏</div>
+  `;
+
   responses.forEach((opt, index) => {
     html += `
       <button class="button" onclick="sendChoice(${index})">
@@ -166,11 +154,11 @@ if (isReply) {
   });
 
   document.getElementById("result").innerHTML = html;
-  window.dateNightOptions = responses; // reuse send logic
+  window.dateNightOptions = responses;
 }
 
 ////////////////////////////////////////////////////////////
-// 👎 DECLINE = NO (SEND POLITE MESSAGE BACK)
+// 👎 NO FLOW (POLITE DECLINE RESPONSE)
 ////////////////////////////////////////////////////////////
 if (isDecline) {
 
@@ -206,16 +194,17 @@ function dinnerMode() {
 }
 
 ////////////////////////////////////////////////////////////
-// 🖤 DATE NIGHT MODE
+// 🖤 DATE NIGHT MODE (START FLOW)
 ////////////////////////////////////////////////////////////
 function dateNightMode() {
+
   const options = [
     "You’ve had my attention all day.",
     "Tonight doesn’t need a plan.",
     "Don’t make me overthink this."
   ];
 
-  let html = "<div>Pick your move...</div><br>";
+  let html = `<div class="section-title">Pick your move...</div>`;
 
   options.forEach((opt, index) => {
     html += `
@@ -230,7 +219,7 @@ function dateNightMode() {
 }
 
 ////////////////////////////////////////////////////////////
-// 🚀 SEND ACTION (YOU → JENN)
+// 🚀 SEND MESSAGE (YOU → JENN)
 ////////////////////////////////////////////////////////////
 function sendChoice(index) {
 
