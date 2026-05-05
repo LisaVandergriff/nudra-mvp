@@ -34,6 +34,8 @@
       color: #000;
       font-size: 16px;
       cursor: pointer;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
     }
 
     #result {
@@ -48,6 +50,7 @@
       font-size: 14px;
       font-style: italic;
       color: #aaa;
+      font-family: Arial, sans-serif;
     }
   </style>
 </head>
@@ -101,30 +104,51 @@ function dateNightMode() {
   });
 
   document.getElementById("result").innerHTML = html;
-
   window.dateNightOptions = options;
 }
 
 function sendChoice(index) {
   const text = window.dateNightOptions[index];
+  const link = "nudra-mvp.vercel.app";
 
   document.getElementById("result").innerHTML = "Sending to your person…";
 
-setTimeout(() => {
-  document.getElementById("result").innerHTML =
-  "Showing your brave side, I see.<br>" +
-  '<span class="tone">' + text + '</span>' +
-  `<br><br>
-`<a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\nnudra-mvp.vercel.app')}" target="_blank" class="button">
-Send to Jenn
-   </a>`;
-}, 1200);
+  setTimeout(() => {
+    document.getElementById("result").innerHTML =
+      "Showing your brave side, I see.<br>" +
+      '<span class="tone">' + text + '</span>' +
+      `<br><br>
+       <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
+         Text Jenn
+       </a>
+
+       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\\n\\n' + link)}" class="button">
+         Email Jenn
+       </a>
+
+       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\\n\\n' + link)}" target="_blank" class="button">
+         Outlook Jenn
+       </a>`;
+  }, 1200);
 }
-  
+
 // 🎲 FATE MODE
 function fateMode() {
-  const chaos = ["Flip a coin and commit", "First place you both think of wins", "Ask a stranger (seriously)", "Close your eyes and point at a map", "Let the other person decide completely"];
-  const tones = ["no backing out.", "you agreed to this.", "trust the chaos.", "this is happening.", "don’t question it."];
+  const chaos = [
+    "Flip a coin and commit",
+    "First place you both think of wins",
+    "Ask a stranger. Seriously.",
+    "Close your eyes and point at a map",
+    "Let the other person decide completely"
+  ];
+
+  const tones = [
+    "no backing out.",
+    "you agreed to this.",
+    "trust the chaos.",
+    "this is happening.",
+    "don’t question it."
+  ];
 
   const result = pick(chaos) + ".";
   document.getElementById("result").innerHTML =
@@ -140,7 +164,14 @@ function reconnectMode() {
     "Ask what they need more of right now",
     "Sit together and just be for a minute"
   ];
-  const tones = ["take your time.", "be honest.", "no distractions.", "just listen.", "this one matters."];
+
+  const tones = [
+    "take your time.",
+    "be honest.",
+    "no distractions.",
+    "just listen.",
+    "this one matters."
+  ];
 
   const result = pick(prompts);
   document.getElementById("result").innerHTML =
