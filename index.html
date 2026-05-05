@@ -6,7 +6,7 @@
   <!-- Mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Vercel Analytics -->
+  <!-- Vercel Analytics (optional - safe to keep or remove) -->
   <script defer src="/_vercel/insights/script.js"></script>
 
   <style>
@@ -115,7 +115,6 @@ function pick(list) {
    URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
-
 const incoming = params.get("msg");
 const isReply  = params.get("reply");
 const isDecline = params.get("decline");
@@ -140,13 +139,9 @@ if (incoming && !isReply && !isDecline) {
     <div id="result">
       <div class="subtle">Someone’s thinking about you.</div>
 
-      <div class="hero">
-        ${decodeURIComponent(incoming)}
-      </div>
+      <div class="hero">${decodeURIComponent(incoming)}</div>
 
-      <div class="tone">
-        So… do you wanna play?
-      </div>
+      <div class="tone">So… do you wanna play?</div>
 
       <br>
 
@@ -194,13 +189,13 @@ if (isDecline) {
 
   const polite = "Not tonight… but don’t stop trying 😏";
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(polite)}`;
-  const fullMessage = `${polite} 😏\n${link}`;
+  const fullMessage = `${polite}\n${link}`;
 
   document.body.innerHTML = `
     <h1>Fair enough…</h1>
 
     <div id="result">
-      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
+      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
       <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">Email it</a>
       <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">Copy</button>
     </div>
@@ -212,8 +207,8 @@ if (isDecline) {
 ========================= */
 
 function dateNightMode() {
-
   console.log("🎯 Mode selected: date");
+  track("mode_selected", { mode: "date" });
 
   const options = [
     "You’ve had my attention all day.",
@@ -279,15 +274,15 @@ function renderOptions(title, options) {
 ========================= */
 function sendChoice(index) {
 
-const text = window.currentOptions[index];
-console.log("Message selected:", text);
+  const text = window.currentOptions[index];
+  console.log("Message selected:", text);
 
-const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
-const fullMessage = `${text} 😏\n${link}`;
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
+  const fullMessage = `${text} 😏\n${link}`;
 
-console.log("📤 Ready to send:", fullMessage);
+  console.log("📤 Ready to send:", fullMessage);
 
-track("message_selected", { text });
+  track("message_selected", { text });
 
   document.body.innerHTML = `
     <h1>Showing your brave side, I see.</h1>
@@ -297,7 +292,7 @@ track("message_selected", { text });
 
       <br><br>
 
-      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
+      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
       <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">Email it</a>
       <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">Copy</button>
     </div>
