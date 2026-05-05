@@ -10,10 +10,24 @@
       text-align: center;
       padding: 80px 20px;
     }
-    h1 { font-size: 44px; margin-bottom: 10px; }
-    p  { font-family: Arial, sans-serif; font-size: 16px; margin-bottom: 30px; }
-    button {
-      padding: 14px 28px;
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      margin-bottom: 40px;
+      color: #ccc;
+    }
+
+    .button {
+      display: block;
+      width: 260px;
+      margin: 10px auto;
+      padding: 14px;
       border-radius: 999px;
       border: none;
       background: #E6D2C6;
@@ -21,14 +35,16 @@
       font-size: 16px;
       cursor: pointer;
     }
+
     #result {
       margin-top: 40px;
-      font-size: 28px;
+      font-size: 26px;
       line-height: 1.4;
     }
+
     .tone {
       display: block;
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: 14px;
       font-style: italic;
       color: #aaa;
@@ -38,25 +54,64 @@
 
 <body>
 
-<h1>Don’t overthink it.</h1>
-<p>Tap it. Let Nudra decide.</p>
+<h1>So… what kind of trouble are we getting into?</h1>
+<p>Pick a mood. I’ll take it from there.</p>
 
-<button onclick="dinnerMode()">Tap to Decide</button>
+<button class="button" onclick="dinnerMode()">🍽️ Dinner / Easy Night</button>
+<button class="button" onclick="dateNightMode()">🖤 Date Night</button>
+<button class="button" onclick="fateMode()">🎲 Let the Fates Decide</button>
+<button class="button" onclick="reconnectMode()">💬 Reconnect</button>
 
-<div id="result">Ask it.</div>
+<div id="result">Go on… pick something.</div>
 
 <script>
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+// 🍝 DINNER MODE
 function dinnerMode() {
-  const actions = ["Go out","Order takeout","Cook at home","Quick meal","Leftovers","Try something new"];
-  const cuisines = ["Italian","Mexican","Chinese","Japanese","American","Mediterranean","Comfort food"];
-  const constraints = ["under 30 minutes","no arguing","one person decides","keep it simple"];
-  const tones = ["no arguing.","you know what you're doing.","don't overthink it.","just go with it.","again?"];
+  const actions = ["Go out", "Order takeout", "Cook at home", "Quick meal", "Leftovers", "Try something new"];
+  const cuisines = ["Italian", "Mexican", "Chinese", "Japanese", "American", "Mediterranean", "Comfort food"];
+  const tones = ["no arguing.", "you know what you’re doing.", "keep it simple.", "just go with it.", "don’t overthink it."];
 
-  const result = pick(actions) + ". " + pick(cuisines) + ". " + pick(constraints) + ".";
+  const result = pick(actions) + ". " + pick(cuisines) + ".";
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+
+// 🖤 DATE NIGHT
+function dateNightMode() {
+  const ideas = ["Get dressed up and go out", "Stay in and make it cozy", "Drinks and appetizers somewhere new", "Movie night with a twist", "Late night dessert run"];
+  const tones = ["make it count.", "no phones.", "just the two of you.", "lean into it.", "you’ve got this."];
+
+  const result = pick(ideas) + ".";
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+
+// 🎲 FATE MODE
+function fateMode() {
+  const chaos = ["Flip a coin and commit", "First place you both think of wins", "Ask a stranger (seriously)", "Close your eyes and point at a map", "Let the other person decide completely"];
+  const tones = ["no backing out.", "you agreed to this.", "trust the chaos.", "this is happening.", "don’t question it."];
+
+  const result = pick(chaos) + ".";
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+
+// 💬 RECONNECT MODE
+function reconnectMode() {
+  const prompts = [
+    "Ask: what’s been on your mind lately?",
+    "Talk about your favorite memory together",
+    "Say something you haven’t said in a while",
+    "Ask what they need more of right now",
+    "Sit together and just be for a minute"
+  ];
+  const tones = ["take your time.", "be honest.", "no distractions.", "just listen.", "this one matters."];
+
+  const result = pick(prompts);
   document.getElementById("result").innerHTML =
     result + '<span class="tone">' + pick(tones) + '</span>';
 }
