@@ -171,21 +171,28 @@ if (isDecline) {
   const polite = "Not tonight… but don’t stop trying 😏";
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(polite)}`;
 
-  document.getElementById("result").innerHTML = `
-    <div>Fair enough… we’ll behave (for now).</div>
+  document.body.innerHTML = `
+    <h1>Fair enough…</h1>
 
-    <br><br>
+    <div id="result">
 
-    <a href="sms:?body=${encodeURIComponent(polite + ' ' + link)}" class="button">
-      Send response
-    </a>
+      <div style="font-size:20px; margin-top:20px;">
+        We’ll behave (for now).
+      </div>
 
-    <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(polite + '\n\n' + link)}" class="button">
-      Email response
-    </a>
+      <br><br>
+
+      <a href="sms:?body=${encodeURIComponent(polite + ' ' + link)}" class="button">
+        Send response
+      </a>
+
+      <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(polite + '\n\n' + link)}" class="button">
+        Email response
+      </a>
+
+    </div>
   `;
 }
-
 ////////////////////////////////////////////////////////////
 // 🍝 DINNER MODE
 ////////////////////////////////////////////////////////////
