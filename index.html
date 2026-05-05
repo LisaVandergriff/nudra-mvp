@@ -72,6 +72,15 @@ function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+const params = new URLSearchParams(window.location.search);
+const incoming = params.get("msg");
+
+if (incoming) {
+  document.getElementById("result").innerHTML =
+    "Well… this was sent to you 😏" +
+    '<span class="tone">' + incoming + '</span>';
+}
+  
 // 🍝 DINNER MODE
 function dinnerMode() {
   const actions = ["Go out", "Order takeout", "Cook at home", "Quick meal", "Leftovers", "Try something new"];
@@ -109,7 +118,7 @@ function dateNightMode() {
 
 function sendChoice(index) {
   const text = window.dateNightOptions[index];
-  const link = "nudra-mvp.vercel.app";
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
   document.getElementById("result").innerHTML = "Sending to your person…";
 
