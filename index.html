@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nudra</title>
+  <style>
+    body {
+      background: #000;
+      color: #E6D2C6;
+      font-family: Georgia, serif;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    h1 { font-size: 44px; margin-bottom: 10px; }
+    p  { font-family: Arial, sans-serif; font-size: 16px; margin-bottom: 30px; }
+    button {
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: none;
+      background: #E6D2C6;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 40px;
+      font-size: 28px;
+      line-height: 1.4;
+    }
+    .tone {
+      display: block;
+      margin-top: 8px;
+      font-size: 14px;
+      font-style: italic;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Don’t overthink it.</h1>
+<p>Tap it. Let Nudra decide.</p>
+
+<button onclick="dinnerMode()">Tap to Decide</button>
+
+<div id="result">Ask it.</div>
+
+<script>
+function pick(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function dinnerMode() {
+  const actions = ["Go out","Order takeout","Cook at home","Quick meal","Leftovers","Try something new"];
+  const cuisines = ["Italian","Mexican","Chinese","Japanese","American","Mediterranean","Comfort food"];
+  const constraints = ["under 30 minutes","no arguing","one person decides","keep it simple"];
+  const tones = ["no arguing.","you know what you're doing.","don't overthink it.","just go with it.","again?"];
+
+  const result = pick(actions) + ". " + pick(cuisines) + ". " + pick(constraints) + ".";
+  document.getElementById("result").innerHTML =
+    result + '<span class="tone">' + pick(tones) + '</span>';
+}
+</script>
+
+</body>
+</html>
