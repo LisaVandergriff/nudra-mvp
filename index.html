@@ -3,96 +3,100 @@
 <head>
   <title>Nudra</title>
 
-  <!-- 📱 MOBILE SCALING (CRITICAL) -->
+  <!-- 📱 MOBILE SCALING -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+    /* ////////////////////////////////////////////////////////////
+       🎨 BASE STYLES
+    //////////////////////////////////////////////////////////// */
 
-  ////////////////////////////////////////////////////////////
-  // 🎨 BASE STYLES
-  ////////////////////////////////////////////////////////////
+    body {
+      background: #000;
+      color: #E6D2C6;
+      font-family: Georgia, serif;
+      text-align: center;
+      padding: 40px 15px;
+    }
 
-  body {
-    background: #000;
-    color: #E6D2C6;
-    font-family: Georgia, serif;
-    text-align: center;
-    padding: 80px 20px;
-  }
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 10px;
+    }
 
-  h1 {
-    font-size: clamp(28px, 6vw, 42px);
-    margin-bottom: 10px;
-  }
+    p {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      margin-bottom: 30px;
+      color: #ccc;
+    }
 
-  p {
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    margin-bottom: 40px;
-    color: #ccc;
-  }
+    /* ////////////////////////////////////////////////////////////
+       🔘 BUTTONS
+    //////////////////////////////////////////////////////////// */
 
-  ////////////////////////////////////////////////////////////
-  // 🔥 HERO TEXT (BIG MESSAGE)
-  ////////////////////////////////////////////////////////////
+    .button {
+      display: block;
+      width: 90%;
+      max-width: 320px;
+      margin: 10px auto;
+      padding: 16px;
+      border-radius: 999px;
+      border: none;
+      background: #E6D2C6;
+      color: #000;
+      font-size: clamp(14px, 4vw, 18px);
+      cursor: pointer;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+    }
 
-  .hero {
-    font-size: clamp(28px, 6vw, 42px);
-    margin-top: 30px;
-    line-height: 1.3;
-  }
+    /* ////////////////////////////////////////////////////////////
+       📝 TEXT AREAS
+    //////////////////////////////////////////////////////////// */
 
-  ////////////////////////////////////////////////////////////
-  // 🔘 BUTTONS (MOBILE FRIENDLY)
-  ////////////////////////////////////////////////////////////
+    #result {
+      margin-top: 30px;
+      font-size: clamp(20px, 5vw, 30px);
+      line-height: 1.4;
+    }
 
-  .button {
-    display: block;
-    width: 90%;
-    max-width: 320px;
-    margin: 10px auto;
-    padding: 16px;
-    border-radius: 999px;
-    border: none;
-    background: #E6D2C6;
-    color: #000;
-    font-size: 17px;
-    cursor: pointer;
-    text-decoration: none;
-    font-family: Arial, sans-serif;
-  }
+    .tone {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      font-style: italic;
+      color: #aaa;
+      font-family: Arial, sans-serif;
+    }
 
-  ////////////////////////////////////////////////////////////
-  // 🧾 RESULT AREA
-  ////////////////////////////////////////////////////////////
+    .section-title {
+      font-size: 20px;
+      margin-top: 30px;
+      color: #ccc;
+    }
 
-  #result {
-    margin-top: 40px;
-    font-size: 22px;
-    line-height: 1.4;
-  }
+    .hero {
+      font-size: clamp(28px, 6vw, 44px);
+      margin-top: 20px;
+    }
 
-  .tone {
-    display: block;
-    margin-top: 10px;
-    font-size: 14px;
-    font-style: italic;
-    color: #aaa;
-    font-family: Arial, sans-serif;
-  }
-
-  .section-title {
-    font-size: 20px;
-    margin-top: 30px;
-    color: #ccc;
-  }
+    .subtle {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 10px;
+      font-family: Arial, sans-serif;
+    }
 
   </style>
 </head>
 
 <body>
 
-<!-- 🏠 DEFAULT HOME VIEW -->
+<!-- ////////////////////////////////////////////////////////////
+     🏠 HOME SCREEN
+//////////////////////////////////////////////////////////// -->
+
 <h1>So… what kind of trouble are we getting into?</h1>
 <p>Pick a mood. I’ll take it from there.</p>
 
@@ -113,7 +117,7 @@ function pick(list) {
 }
 
 ////////////////////////////////////////////////////////////
-// 🔍 URL PARAMS (DRIVES FLOW)
+// 🔍 URL PARAMS
 ////////////////////////////////////////////////////////////
 const params = new URLSearchParams(window.location.search);
 
@@ -122,7 +126,7 @@ const isReply  = params.get("reply");
 const isDecline = params.get("decline");
 
 ////////////////////////////////////////////////////////////
-// 📩 INCOMING MESSAGE (RECEIVER VIEW)
+// 📩 INCOMING MESSAGE (JENN VIEW)
 ////////////////////////////////////////////////////////////
 if (incoming && !isReply && !isDecline) {
 
@@ -131,7 +135,7 @@ if (incoming && !isReply && !isDecline) {
 
     <div id="result">
 
-      <div class="section-title">
+      <div class="subtle">
         Someone’s thinking about you.
       </div>
 
@@ -145,13 +149,8 @@ if (incoming && !isReply && !isDecline) {
 
       <br>
 
-      <a href="?reply=true" class="button">
-        Why yes I do
-      </a>
-
-      <a href="?decline=true&msg=${encodeURIComponent(incoming)}" class="button">
-        Not now
-      </a>
+      <a href="?reply=true" class="button">Why yes I do</a>
+      <a href="?decline=true&msg=${encodeURIComponent(incoming)}" class="button">Not now</a>
 
     </div>
   `;
@@ -160,7 +159,7 @@ if (incoming && !isReply && !isDecline) {
 }
 
 ////////////////////////////////////////////////////////////
-// 👍 YES FLOW (REPLY MODE)
+// 👍 YES FLOW
 ////////////////////////////////////////////////////////////
 if (isReply) {
 
@@ -186,12 +185,11 @@ if (isReply) {
   html += `</div>`;
 
   document.body.innerHTML = html;
-
   window.dateNightOptions = responses;
 }
 
 ////////////////////////////////////////////////////////////
-// 👎 NO FLOW (DECLINE)
+// 👎 NO FLOW
 ////////////////////////////////////////////////////////////
 if (isDecline) {
 
@@ -216,7 +214,7 @@ if (isDecline) {
 }
 
 ////////////////////////////////////////////////////////////
-// 🖤 DATE NIGHT (START FLOW)
+// 🖤 DATE NIGHT (START)
 ////////////////////////////////////////////////////////////
 function dateNightMode() {
 
@@ -241,35 +239,37 @@ function dateNightMode() {
 }
 
 ////////////////////////////////////////////////////////////
-// 🚀 SEND MESSAGE (CORE FUNCTION)
+// 🚀 SEND MESSAGE (FIXED VERSION)
 ////////////////////////////////////////////////////////////
 function sendChoice(index) {
 
   const text = window.dateNightOptions[index];
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
-  document.getElementById("result").innerHTML = "Sending to your person…";
+  // 🔥 FULL SCREEN REPLACE (this was your missing piece earlier)
+  document.body.innerHTML = `
+    <h1>Showing your brave side, I see.</h1>
 
-  setTimeout(() => {
+    <div id="result">
 
-    document.getElementById("result").innerHTML =
-      "Showing your brave side, I see.<br>" +
-      '<span class="tone">' + text + '</span>' +
-      `<br><br>
+      <div class="tone">${text}</div>
 
-       <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
-         Send it
-       </a>
+      <br><br>
 
-       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\nOpen this → ' + link)}" class="button">
-         Email it
-       </a>
+      <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
+        Send it
+      </a>
 
-       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" target="_blank" class="button">
-         Outlook it
-       </a>`;
+      <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\nOpen this → ' + link)}" class="button">
+        Email it
+      </a>
 
-  }, 1200);
+      <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\\n\\n' + link)}" target="_blank" class="button">
+        Outlook it
+      </a>
+
+    </div>
+  `;
 }
 
 ////////////////////////////////////////////////////////////
@@ -277,36 +277,25 @@ function sendChoice(index) {
 ////////////////////////////////////////////////////////////
 function dinnerMode() {
   const actions = ["Go out", "Order takeout", "Cook at home"];
-  const cuisines = ["Italian", "Mexican", "Chinese"];
-  const tones = ["keep it simple.", "just go with it."];
-
+  const cuisines = ["Italian", "Mexican", "Comfort food"];
   const result = pick(actions) + ". " + pick(cuisines) + ".";
-  document.getElementById("result").innerHTML =
-    result + '<span class="tone">' + pick(tones) + '</span>';
+  document.getElementById("result").innerHTML = result;
 }
 
 ////////////////////////////////////////////////////////////
 // 🎲 FATE MODE
 ////////////////////////////////////////////////////////////
 function fateMode() {
-  const chaos = ["Flip a coin", "Ask a stranger"];
-  const tones = ["no backing out.", "trust the chaos."];
-
-  const result = pick(chaos);
-  document.getElementById("result").innerHTML =
-    result + '<span class="tone">' + pick(tones) + '</span>';
+  const chaos = ["Flip a coin", "Ask a stranger", "Close your eyes and pick"];
+  document.getElementById("result").innerHTML = pick(chaos);
 }
 
 ////////////////////////////////////////////////////////////
 // 💬 RECONNECT MODE
 ////////////////////////////////////////////////////////////
 function reconnectMode() {
-  const prompts = ["Talk about your favorite memory"];
-  const tones = ["this one matters."];
-
-  const result = pick(prompts);
-  document.getElementById("result").innerHTML =
-    result + '<span class="tone">' + pick(tones) + '</span>';
+  const prompts = ["Ask what they need right now", "Share a memory"];
+  document.getElementById("result").innerHTML = pick(prompts);
 }
 
 </script>
