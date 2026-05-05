@@ -279,13 +279,15 @@ function renderOptions(title, options) {
 ========================= */
 function sendChoice(index) {
 
-  const text = window.currentOptions[index];
-  console.log("Message selected:", text);
-  console.log("📤 Ready to send:", fullMessage);
-  track("message_selected", { text });
+const text = window.currentOptions[index];
+console.log("Message selected:", text);
 
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
-  const fullMessage = `${text} 😏\n${link}`;
+const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
+const fullMessage = `${text} 😏\n${link}`;
+
+console.log("📤 Ready to send:", fullMessage);
+
+track("message_selected", { text });
 
   document.body.innerHTML = `
     <h1>Showing your brave side, I see.</h1>
