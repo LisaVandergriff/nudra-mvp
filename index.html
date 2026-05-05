@@ -120,7 +120,16 @@ function sendChoice(index) {
   const text = window.dateNightOptions[index];
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
-  document.getElementById("result").innerHTML = "Sending to your person…";
+  document.getElementById("result").innerHTML =
+  `<div style="font-size:18px; color:#aaa;">Someone made a move…</div>
+
+   <div style="font-size:36px; margin-top:20px; line-height:1.3;">
+     ${incoming}
+   </div>
+
+   <div class="tone" style="margin-top:15px;">
+     And now it's your turn.
+   </div>`;
 
   setTimeout(() => {
     document.getElementById("result").innerHTML =
