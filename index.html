@@ -225,7 +225,7 @@ function dateNightMode() {
 }
 
 ////////////////////////////////////////////////////////////
-// 🚀 SEND MESSAGE (YOU → JENN)
+// 🚀 SEND MESSAGE (WORKS BOTH DIRECTIONS)
 ////////////////////////////////////////////////////////////
 function sendChoice(index) {
 
@@ -242,15 +242,15 @@ function sendChoice(index) {
       `<br><br>
 
        <a href="sms:?body=${encodeURIComponent(text + ' 😏 ' + link)}" class="button">
-         Text Jenn
+         Send it
        </a>
 
-       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" class="button">
-         Email Jenn
+       <a href="mailto:jennifer12555@gmail.com?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\\n\\n' + link)}" class="button">
+         Email it
        </a>
 
-       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\n\n' + link)}" target="_blank" class="button">
-         Outlook Jenn
+       <a href="https://outlook.office.com/mail/deeplink/compose?to=jennifer12555@gmail.com&subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(text + '\\n\\n' + link)}" target="_blank" class="button">
+         Outlook it
        </a>`;
 
   }, 1200);
