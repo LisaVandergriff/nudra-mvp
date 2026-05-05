@@ -186,7 +186,7 @@ if (isDecline) {
     <h1>Fair enough…</h1>
 
     <div id="result">
-      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">
+      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">
         Send it
       </a>
 
@@ -249,7 +249,7 @@ function sendChoice(index) {
 
       <br><br>
 
-      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">
+      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">
         Send it
       </a>
 
