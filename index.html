@@ -239,7 +239,7 @@ function sendChoice(index) {
   const text = window.dateNightOptions[index];
 
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
-  const fullMessage = text + " 😏 " + link;
+  const fullMessage = `${text} 😏\n${link}`;
 
   document.body.innerHTML = `
     <h1>Showing your brave side, I see.</h1>
