@@ -3,14 +3,13 @@
 <head>
   <title>Nudra</title>
 
-  <!-- MOBILE SCALING -->
+  <!-- Mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    /* =========================
-       BASE STYLES
-    ========================= */
+  <!-- Vercel Analytics -->
+  <script defer src="/_vercel/insights/script.js"></script>
 
+  <style>
     body {
       background: #000;
       color: #E6D2C6;
@@ -31,10 +30,6 @@
       color: #ccc;
     }
 
-    /* =========================
-       BUTTONS
-    ========================= */
-
     .button {
       display: block;
       width: 90%;
@@ -50,10 +45,6 @@
       text-decoration: none;
       font-family: Arial, sans-serif;
     }
-
-    /* =========================
-       TEXT AREAS
-    ========================= */
 
     #result {
       margin-top: 30px;
@@ -87,15 +78,10 @@
       margin-top: 10px;
       font-family: Arial, sans-serif;
     }
-
   </style>
 </head>
 
 <body>
-
-<!-- =========================
-     HOME SCREEN
-========================= -->
 
 <h1>So… what kind of trouble are we getting into?</h1>
 <p>Pick a mood. I’ll take it from there.</p>
@@ -109,35 +95,50 @@
 
 <script>
 
-////////////////////////////////////////////////////////////
-// HELPER FUNCTION
-////////////////////////////////////////////////////////////
+/* =========================
+   TRACKING HELPER
+========================= */
+function track(event, data = {}) {
+  if (window.va) {
+    window.va('event', event, data);
+  }
+}
+
+/* =========================
+   RANDOM PICKER
+========================= */
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-////////////////////////////////////////////////////////////
-// URL PARAMS (DRIVES FLOW STATE)
-////////////////////////////////////////////////////////////
+/* =========================
+   URL STATE
+========================= */
 const params = new URLSearchParams(window.location.search);
 
-const incoming = params.get("msg");     // incoming message
-const isReply  = params.get("reply");   // YES flow
-const isDecline = params.get("decline");// NO flow
+const incoming = params.get("msg");
+const isReply  = params.get("reply");
+const isDecline = params.get("decline");
 
-////////////////////////////////////////////////////////////
-// INCOMING MESSAGE VIEW
-////////////////////////////////////////////////////////////
+/* =========================
+   PAGE LOAD TRACK
+========================= */
+console.log("Page loaded", { incoming, isReply, isDecline });
+track("page_load");
+
+/* =========================
+   INCOMING MESSAGE VIEW
+========================= */
 if (incoming && !isReply && !isDecline) {
+
+  console.log("Incoming message opened");
+  track("incoming_open");
 
   document.body.innerHTML = `
     <h1>Psst…</h1>
 
     <div id="result">
-
-      <div class="subtle">
-        Someone’s thinking about you.
-      </div>
+      <div class="subtle">Someone’s thinking about you.</div>
 
       <div class="hero">
         ${decodeURIComponent(incoming)}
@@ -151,17 +152,19 @@ if (incoming && !isReply && !isDecline) {
 
       <a href="?reply=true" class="button">Why yes I do</a>
       <a href="?decline=true&msg=${encodeURIComponent(incoming)}" class="button">Not now</a>
-
     </div>
   `;
 
-  throw new Error("stop execution");
+  throw new Error("stop");
 }
 
-////////////////////////////////////////////////////////////
-// YES FLOW (CONTINUE LOOP)
-////////////////////////////////////////////////////////////
+/* =========================
+   YES FLOW
+========================= */
 if (isReply) {
+
+  console.log("User clicked YES");
+  track("clicked_yes");
 
   const responses = [
     "Careful… I might take you up on that.",
@@ -169,17 +172,10 @@ if (isReply) {
     "You started this. Don’t disappear now."
   ];
 
-  let html = `
-    <h1>Alright… your turn 😏</h1>
-    <div id="result">
-  `;
+  let html = `<h1>Alright… your turn 😏</h1><div id="result">`;
 
   responses.forEach((opt, index) => {
-    html += `
-      <button class="button" onclick="sendChoice(${index})">
-        ${opt}
-      </button>
-    `;
+    html += `<button class="button" onclick="sendChoice(${index})">${opt}</button>`;
   });
 
   html += `</div>`;
@@ -188,40 +184,35 @@ if (isReply) {
   window.currentOptions = responses;
 }
 
-////////////////////////////////////////////////////////////
-// NO FLOW (POLITE EXIT BUT LOOPABLE)
-////////////////////////////////////////////////////////////
+/* =========================
+   NO FLOW
+========================= */
 if (isDecline) {
+
+  console.log("User clicked NO");
+  track("clicked_no");
 
   const polite = "Not tonight… but don’t stop trying 😏";
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(polite)}`;
-  const fullMessage = `${polite}\n${link}`;
+  const fullMessage = `${polite} 😏\n${link}`;
 
   document.body.innerHTML = `
     <h1>Fair enough…</h1>
 
     <div id="result">
-
-      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">
-        Send it
-      </a>
-
-      <a href="mailto:?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(fullMessage)}" class="button">
-        Email it
-      </a>
-
-      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">
-        Copy
-      </button>
-
+      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
+      <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">Email it</a>
+      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">Copy</button>
     </div>
   `;
 }
 
-////////////////////////////////////////////////////////////
-// DATE NIGHT MODE
-////////////////////////////////////////////////////////////
+/* =========================
+   MODES
+========================= */
+
 function dateNightMode() {
+  track("mode_selected", { mode: "date" });
 
   const options = [
     "You’ve had my attention all day.",
@@ -232,10 +223,8 @@ function dateNightMode() {
   renderOptions("Pick your move...", options);
 }
 
-////////////////////////////////////////////////////////////
-// DINNER MODE
-////////////////////////////////////////////////////////////
 function dinnerMode() {
+  track("mode_selected", { mode: "dinner" });
 
   const options = [
     "Let’s not overthink this—pick a place.",
@@ -246,10 +235,8 @@ function dinnerMode() {
   renderOptions("What’s the plan?", options);
 }
 
-////////////////////////////////////////////////////////////
-// FATE MODE
-////////////////////////////////////////////////////////////
 function fateMode() {
+  track("mode_selected", { mode: "fate" });
 
   const options = [
     "No thinking—first idea wins.",
@@ -260,10 +247,8 @@ function fateMode() {
   renderOptions("Let chaos decide…", options);
 }
 
-////////////////////////////////////////////////////////////
-// RECONNECT MODE
-////////////////////////////////////////////////////////////
 function reconnectMode() {
+  track("mode_selected", { mode: "reconnect" });
 
   const options = [
     "Come sit with me for a minute.",
@@ -274,31 +259,29 @@ function reconnectMode() {
   renderOptions("Slow it down…", options);
 }
 
-////////////////////////////////////////////////////////////
-// RENDER OPTIONS (SHARED UI)
-////////////////////////////////////////////////////////////
+/* =========================
+   RENDER OPTIONS
+========================= */
 function renderOptions(title, options) {
-
   let html = `<div class="section-title">${title}</div>`;
 
   options.forEach((opt, index) => {
-    html += `
-      <button class="button" onclick="sendChoice(${index})">
-        ${opt}
-      </button>
-    `;
+    html += `<button class="button" onclick="sendChoice(${index})">${opt}</button>`;
   });
 
   document.getElementById("result").innerHTML = html;
   window.currentOptions = options;
 }
 
-////////////////////////////////////////////////////////////
-// SEND MESSAGE (CORE LOOP ENGINE)
-////////////////////////////////////////////////////////////
+/* =========================
+   SEND MESSAGE
+========================= */
 function sendChoice(index) {
 
   const text = window.currentOptions[index];
+  console.log("Message selected:", text);
+  track("message_selected", { text });
+
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
   const fullMessage = `${text} 😏\n${link}`;
 
@@ -306,37 +289,24 @@ function sendChoice(index) {
     <h1>Showing your brave side, I see.</h1>
 
     <div id="result">
-
       <div class="tone">${text}</div>
 
       <br><br>
 
-      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">
-        Send it
-      </a>
-
-      <a href="mailto:?subject=${encodeURIComponent('Nudra 😏')}&body=${encodeURIComponent(fullMessage)}" class="button">
-        Email it
-      </a>
-
-      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">
-        Copy
-      </button>
-
+      <a href="sms:&body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
+      <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">Email it</a>
+      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">Copy</button>
     </div>
   `;
 }
 
-////////////////////////////////////////////////////////////
-// COPY FUNCTION (FALLBACK UX WIN)
-////////////////////////////////////////////////////////////
+/* =========================
+   COPY FUNCTION
+========================= */
 function copyMessage(encodedMessage) {
-
   const decoded = decodeURIComponent(encodedMessage);
-
-  navigator.clipboard.writeText(decoded).then(() => {
-    alert("Copied!");
-  });
+  navigator.clipboard.writeText(decoded);
+  alert("Copied!");
 }
 
 </script>
