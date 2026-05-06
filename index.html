@@ -80,7 +80,7 @@
 
 <div id="app">
 
-  <!-- OPENING -->
+  <!-- OPENING SCREEN -->
   <div id="opening">
     <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
@@ -93,40 +93,40 @@
 <script>
 
 /* =========================
-   SCRIPT ENGINE
+   SCRIPT ENGINE (FIXED)
 ========================= */
 const scripts = {
 
-  dinner: {
-    opener: [
-      "Let’s not overthink this…",
-      "Stay in tonight",
-      "Go out and see what happens",
-      "Surprise me"
-    ]
-  },
-
-  date: {
-    opener: [
-      "You’ve had my attention all day.",
-      "Tonight doesn’t need a plan.",
-      "Don’t make me overthink this."
+  fate: {
+    hero: "No thinking—first idea wins.",
+    choices: [
+      "Flip a coin and commit.",
+      "You decide. No take-backs."
     ]
   },
 
   reconnect: {
-    opener: [
-      "Come sit with me for a minute.",
+    hero: "Come sit with me for a minute.",
+    choices: [
       "Tell me what’s been on your mind.",
       "Let’s reset… just us."
     ]
   },
 
-  fate: {
-    opener: [
-      "No thinking—first idea wins.",
-      "Flip a coin and commit.",
-      "You decide. No take-backs."
+  date: {
+    hero: "You’ve had my attention all day.",
+    choices: [
+      "Tonight doesn’t need a plan.",
+      "Don’t make me overthink this."
+    ]
+  },
+
+  dinner: {
+    hero: "Let’s not overthink this…",
+    choices: [
+      "Stay in tonight",
+      "Go out and see what happens",
+      "Surprise me"
     ]
   }
 
@@ -146,7 +146,7 @@ function fadeTo(html) {
 }
 
 /* =========================
-   DIRECTIONS SCREEN
+   SCREEN: DIRECTIONS
 ========================= */
 function showDirections() {
 
@@ -161,14 +161,12 @@ function showDirections() {
 }
 
 /* =========================
-   MODE SCREEN
+   SCREEN: MODE
 ========================= */
 function startMode(mode) {
 
-  const options = scripts[mode].opener;
-
-  const hero = options[0];
-  const choices = options.slice(1);
+  const hero = scripts[mode].hero;
+  const choices = scripts[mode].choices;
 
   let html = `<h1>${hero}</h1>`;
 
@@ -180,7 +178,7 @@ function startMode(mode) {
 }
 
 /* =========================
-   SEND SCREEN
+   SCREEN: SEND
 ========================= */
 function sendChoice(text) {
 
