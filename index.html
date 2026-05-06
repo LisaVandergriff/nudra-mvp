@@ -246,7 +246,7 @@ function showDirections(){
 
 function startMode(mode){
   const options=scripts[mode][0];
-  let html=``;
+  let html=`${debugTag("A • STEP 2")}`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
   });
