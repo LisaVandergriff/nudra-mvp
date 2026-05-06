@@ -14,71 +14,61 @@
       font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
-      margin: 0;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
     }
 
-    #app {
-      transition: opacity 0.3s ease;
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
-    .hero {
-      font-size: clamp(24px, 4vw, 36px);
-      margin-bottom: 30px;
-    }
-
-    .orb {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin: 40px auto;
-      background: radial-gradient(circle, rgba(230,210,192,0.25), rgba(230,210,192,0.05));
-      box-shadow:
-        0 0 20px rgba(230,210,192,0.3),
-        0 0 60px rgba(230,210,192,0.15);
-      animation: pulse 3s infinite ease-in-out;
-      cursor: pointer;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+    .subtle {
+      font-family: 'Inter', sans-serif;
+      color: #888;
+      font-size: 14px;
+      margin-top: 10px;
     }
 
     .button {
       display: block;
       width: 90%;
       max-width: 320px;
-      margin: 14px auto;
+      margin: 12px auto;
       padding: 16px;
       border-radius: 999px;
       border: 1px solid rgba(230,210,192,0.25);
-      background: rgba(230,210,192,0.06);
+      background: transparent;
       color: #E6D2C0;
-      font-family: 'Inter', sans-serif;
       font-size: 16px;
       cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: all 0.25s ease;
-      text-decoration: none;
+      transition: all 0.3s ease;
     }
 
     .button:hover {
-      background: rgba(230,210,192,0.14);
       box-shadow: 0 0 20px rgba(230,210,192,0.25);
       transform: scale(1.03);
     }
 
-    .subtle {
-      font-size: 14px;
-      color: rgba(230,210,192,0.5);
-      margin-bottom: 10px;
+    .glow-orb {
+      width: 90px;
+      height: 90px;
+      margin: 40px auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(230,210,192,0.9), rgba(230,210,192,0.05));
+      box-shadow: 0 0 25px rgba(230,210,192,0.5);
+      animation: pulse 2.5s infinite ease-in-out;
     }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
   </style>
 </head>
 
@@ -89,7 +79,7 @@
 <script>
 
 /* =========================
-   URL STATE
+   STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
@@ -102,120 +92,167 @@ const accepted = params.get("accepted");
    SCRIPT ENGINE
 ========================= */
 const scripts = {
-  fate: [
-    ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
-    ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
-  ],
-  reconnect: [
-    ["Tell me what’s been on your mind.", "Let’s reset… just us.", "Come sit with me for a minute."],
-    ["I’m here… talk to me.", "That pulled me in.", "Don’t disappear now."]
-  ],
-  date: [
-    ["Tonight doesn’t need a plan.", "Don’t make me overthink this.", "You’ve had my attention all day."],
-    ["Careful… I might take you up on that.", "You’re starting something.", "What’s next?"]
-  ],
-  dinner: [
-    ["Stay in tonight", "Go out and see what happens", "Surprise me"],
-    ["Now I’m invested.", "You always do this.", "Where is this going?"]
-  ]
+
+  reconnect: {
+    opener: [
+      "Come sit with me for a minute.",
+      "Tell me what’s been on your mind.",
+      "Let’s reset… just us."
+    ],
+    responses: [
+      ["I’m here.", "Talk to me.", "Don’t rush this."],
+      ["That feels better already.", "Stay with me.", "Keep going."],
+      ["Yeah… this matters.", "Don’t lose this.", "I’m glad you stayed."]
+    ]
+  },
+
+  date: {
+    opener: [
+      "You’ve had my attention all day.",
+      "Tonight doesn’t need a plan.",
+      "Don’t make me overthink this."
+    ],
+    responses: [
+      ["Careful… I’m listening.", "Go on…", "You’ve got my attention."],
+      ["You always do this to me.", "Okay… now what?", "I’m in."],
+      ["No backing out now.", "You win.", "Let’s see where this goes."]
+    ]
+  },
+
+  fate: {
+    opener: [
+      "No thinking—first idea wins.",
+      "Flip a coin and commit.",
+      "You decide. No take-backs."
+    ],
+    responses: [
+      ["Alright… I’ll bite.", "You picked this.", "Let’s see."],
+      ["This could go anywhere.", "You’re bold.", "I like it."],
+      ["No regrets now.", "We’re doing this.", "Let’s go."]
+    ]
+  }
+
 };
 
 /* =========================
-   FADE
+   RENDER
 ========================= */
-function fadeTo(html) {
-  const app = document.getElementById("app");
-  app.style.opacity = 0;
+const app = document.getElementById("app");
 
-  setTimeout(() => {
-    app.innerHTML = html;
-    app.style.opacity = 1;
-  }, 200);
+function renderHTML(html) {
+  app.innerHTML = html;
 }
 
 /* =========================
-   HOME (A)
+   A FLOW (START)
 ========================= */
-function showHome() {
-  fadeTo(`
-    <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
-    <h1>Welcome back.<br>Come play with me.</h1>
-    <div class="orb" onclick="showDirections()"></div>
-  `);
-}
-
-function showDirections() {
-  fadeTo(`
-    <h1>What are we feeling?</h1>
-
-    <button class="button" onclick="startMode('dinner')">Dinner</button>
-    <button class="button" onclick="startMode('date')">Date Night</button>
-    <button class="button" onclick="startMode('fate')">Fate</button>
-    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
-  `);
-}
-
 function startMode(selectedMode) {
-  const options = scripts[selectedMode][0];
+  const options = scripts[selectedMode].opener;
 
-  let html = ``;
+  window.currentMode = selectedMode;
+  window.currentOptions = options;
 
-  options.forEach(opt => {
-    html += `<button class="button" onclick="sendChoice('${opt}', '${selectedMode}', 2)">${opt}</button>`;
+  renderOptions(options);
+}
+
+/* =========================
+   OPTIONS
+========================= */
+function renderOptions(options) {
+  let html = `<h1></h1>`;
+
+  options.forEach((opt, i) => {
+    html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
   });
 
-  fadeTo(html);
+  renderHTML(html);
 }
 
 /* =========================
    SEND
 ========================= */
-function sendChoice(text, mode, nextStep) {
+function sendChoice(i) {
 
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+  const text = window.currentOptions[i];
+  const nextStep = step + 1;
 
-  const fullMessage = `${text}\n\n${link}`;
+  const link = `${window.location.origin}?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}`;
 
-  fadeTo(`
-    <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send</a>
-    <button class="button" onclick="copyMsg('${encodeURIComponent(fullMessage)}')">Copy</button>
+  renderHTML(`
+    <div class="glow-orb"></div>
+    <button class="button" onclick="window.location.href='sms:?body=${encodeURIComponent(link)}'">Send</button>
+    <button class="button" onclick="copyLink('${link}')">Copy</button>
   `);
 }
 
-function copyMsg(encoded) {
-  navigator.clipboard.writeText(decodeURIComponent(encoded));
+function copyLink(link) {
+  navigator.clipboard.writeText(link);
+  alert("Link copied");
 }
 
 /* =========================
-   B EXPERIENCE
+   B FIRST EXPERIENCE (🔥 KEY)
 ========================= */
 if (msg && !accepted) {
 
-  fadeTo(`
-    <div class="hero">${decodeURIComponent(msg)}</div>
+  renderHTML(`
+    <h1 style="font-size:28px; font-weight:400;">
+      ${decodeURIComponent(msg)}
+    </h1>
 
-    <div class="subtle">Do you want to play?</div>
+    <div class="subtle">…you don’t have to decide anything yet</div>
 
-    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
-    <a href="/" class="button">Not now</a>
+    <div class="glow-orb"></div>
+
+    <button class="button" onclick="accept()">Stay a minute</button>
+    <button class="button" onclick="window.location.href='/'">Maybe later</button>
   `);
 
-} else if (msg && accepted) {
+}
 
-  const options = scripts[mode]?.[step - 1] || ["…"];
+/* =========================
+   ACCEPT FLOW
+========================= */
+function accept() {
+  const url = `?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
+  window.location.href = url;
+}
 
-  let html = `<div class="hero">${decodeURIComponent(msg)}</div>`;
+/* =========================
+   CONTINUATION
+========================= */
+else if (msg && accepted) {
 
-  options.forEach(opt => {
-    html += `<button class="button" onclick="sendChoice('${opt}', '${mode}', ${step + 1})">${opt}</button>`;
+  const options = scripts[mode].responses[step - 1] || [];
+
+  window.currentMode = mode;
+  window.currentOptions = options;
+
+  let html = `
+    <h1>${decodeURIComponent(msg)}</h1>
+  `;
+
+  options.forEach((opt, i) => {
+    html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
   });
 
-  fadeTo(html);
+  renderHTML(html);
+}
 
-} else {
+/* =========================
+   DEFAULT LANDING
+========================= */
+else {
 
-  showHome();
+  renderHTML(`
+    <div class="glow-orb"></div>
 
+    <h1>Welcome back.<br>Come play with me.</h1>
+
+    <button class="button" onclick="startMode('date')">Date Night</button>
+    <button class="button" onclick="startMode('fate')">Fate</button>
+    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
+  `);
 }
 
 </script>
