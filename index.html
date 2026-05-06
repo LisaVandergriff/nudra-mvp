@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>Lurre</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
@@ -18,9 +17,7 @@
       animation: fadeIn 0.8s ease forwards;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+    @keyframes fadeIn { to { opacity: 1; } }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
@@ -68,7 +65,6 @@
       0%,100% { transform: scale(1); opacity: 0.85; }
       50% { transform: scale(1.1); opacity: 1; }
     }
-
   </style>
 </head>
 
@@ -78,9 +74,6 @@
 
 <script>
 
-/* =========================
-   STATE
-========================= */
 const params = new URLSearchParams(window.location.search);
 
 const msg = params.get("msg");
@@ -88,11 +81,16 @@ const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
+const app = document.getElementById("app");
+
+function render(html) {
+  app.innerHTML = html;
+}
+
 /* =========================
-   SCRIPT ENGINE
+   SCRIPTS
 ========================= */
 const scripts = {
-
   reconnect: {
     opener: [
       "Come sit with me for a minute.",
@@ -101,8 +99,7 @@ const scripts = {
     ],
     responses: [
       ["I’m here.", "Talk to me.", "Don’t rush this."],
-      ["That feels better already.", "Stay with me.", "Keep going."],
-      ["Yeah… this matters.", "Don’t lose this.", "I’m glad you stayed."]
+      ["That feels better already.", "Stay with me.", "Keep going."]
     ]
   },
 
@@ -113,9 +110,8 @@ const scripts = {
       "Don’t make me overthink this."
     ],
     responses: [
-      ["Careful… I’m listening.", "Go on…", "You’ve got my attention."],
-      ["You always do this to me.", "Okay… now what?", "I’m in."],
-      ["No backing out now.", "You win.", "Let’s see where this goes."]
+      ["Go on…", "You’ve got me.", "I’m listening."],
+      ["Okay… now what?", "You started this.", "I’m in."]
     ]
   },
 
@@ -126,25 +122,28 @@ const scripts = {
       "You decide. No take-backs."
     ],
     responses: [
-      ["Alright… I’ll bite.", "You picked this.", "Let’s see."],
-      ["This could go anywhere.", "You’re bold.", "I like it."],
-      ["No regrets now.", "We’re doing this.", "Let’s go."]
+      ["Alright…", "Let’s see.", "You picked this."],
+      ["No regrets.", "We’re doing this.", "Let’s go."]
     ]
   }
-
 };
 
 /* =========================
-   RENDER
+   DEFAULT (A landing)
 ========================= */
-const app = document.getElementById("app");
+function showHome() {
+  render(`
+    <div class="glow-orb"></div>
+    <h1>Welcome back.<br>Come play with me.</h1>
 
-function renderHTML(html) {
-  app.innerHTML = html;
+    <button class="button" onclick="startMode('date')">Date Night</button>
+    <button class="button" onclick="startMode('fate')">Fate</button>
+    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
+  `);
 }
 
 /* =========================
-   A FLOW (START)
+   A FLOW
 ========================= */
 function startMode(selectedMode) {
   const options = scripts[selectedMode].opener;
@@ -152,33 +151,25 @@ function startMode(selectedMode) {
   window.currentMode = selectedMode;
   window.currentOptions = options;
 
-  renderOptions(options);
-}
-
-/* =========================
-   OPTIONS
-========================= */
-function renderOptions(options) {
-  let html = `<h1></h1>`;
+  let html = "";
 
   options.forEach((opt, i) => {
     html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
   });
 
-  renderHTML(html);
+  render(html);
 }
 
 /* =========================
    SEND
 ========================= */
 function sendChoice(i) {
-
   const text = window.currentOptions[i];
   const nextStep = step + 1;
 
   const link = `${window.location.origin}?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}`;
 
-  renderHTML(`
+  render(`
     <div class="glow-orb"></div>
     <button class="button" onclick="window.location.href='sms:?body=${encodeURIComponent(link)}'">Send</button>
     <button class="button" onclick="copyLink('${link}')">Copy</button>
@@ -187,15 +178,14 @@ function sendChoice(i) {
 
 function copyLink(link) {
   navigator.clipboard.writeText(link);
-  alert("Link copied");
+  alert("Copied");
 }
 
 /* =========================
-   B FIRST EXPERIENCE (🔥 KEY)
+   B FIRST EXPERIENCE
 ========================= */
-if (msg && !accepted) {
-
-  renderHTML(`
+function showBEntry() {
+  render(`
     <h1 style="font-size:28px; font-weight:400;">
       ${decodeURIComponent(msg)}
     </h1>
@@ -205,54 +195,47 @@ if (msg && !accepted) {
     <div class="glow-orb"></div>
 
     <button class="button" onclick="accept()">Stay a minute</button>
-    <button class="button" onclick="window.location.href='/'">Maybe later</button>
+    <button class="button" onclick="showHome()">Maybe later</button>
   `);
-
 }
 
 /* =========================
-   ACCEPT FLOW
+   ACCEPT
 ========================= */
 function accept() {
-  const url = `?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
+  const url = `${window.location.origin}?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
   window.location.href = url;
 }
 
 /* =========================
-   CONTINUATION
+   CONTINUE FLOW
 ========================= */
-else if (msg && accepted) {
-
-  const options = scripts[mode].responses[step - 1] || [];
+function showContinuation() {
+  const options = scripts[mode]?.responses[step - 1] || [];
 
   window.currentMode = mode;
   window.currentOptions = options;
 
-  let html = `
-    <h1>${decodeURIComponent(msg)}</h1>
-  `;
+  let html = `<h1>${decodeURIComponent(msg)}</h1>`;
 
   options.forEach((opt, i) => {
     html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
   });
 
-  renderHTML(html);
+  render(html);
 }
 
 /* =========================
-   DEFAULT LANDING
+   ROUTER (FIXED)
 ========================= */
+if (!msg) {
+  showHome();
+}
+else if (!accepted) {
+  showBEntry();
+}
 else {
-
-  renderHTML(`
-    <div class="glow-orb"></div>
-
-    <h1>Welcome back.<br>Come play with me.</h1>
-
-    <button class="button" onclick="startMode('date')">Date Night</button>
-    <button class="button" onclick="startMode('fate')">Fate</button>
-    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
-  `);
+  showContinuation();
 }
 
 </script>
