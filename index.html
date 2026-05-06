@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Lurre</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
@@ -16,18 +17,18 @@
       margin: 0;
     }
 
-    #app { transition: opacity 0.4s ease; }
+    #app {
+      transition: opacity 0.4s ease;
+    }
 
-    .hero { font-size: clamp(26px, 4vw, 36px); margin-bottom: 20px; }
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 40px;
+    }
 
-    .debug {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      font-family: Inter, sans-serif;
-      font-size: 12px;
-      color: #aaa;
-      opacity: 0.6;
+    .hero {
+      font-size: clamp(26px, 4vw, 36px);
+      margin-bottom: 20px;
     }
 
     .orb {
@@ -36,24 +37,64 @@
       border-radius: 50%;
       margin: 40px auto;
       background: radial-gradient(circle, rgba(230,210,192,0.35), rgba(230,210,192,0.05));
-      box-shadow: 0 0 25px rgba(230,210,192,0.4);
+      box-shadow:
+        0 0 25px rgba(230,210,192,0.4),
+        0 0 70px rgba(230,210,192,0.2);
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    .orb.active {
+      animation: flutter 2.8s ease-in-out forwards;
+      opacity: 1;
+    }
+
+    .orb.fade-out {
+      animation: fadeOrb 1.5s ease forwards;
+    }
+
+    @keyframes flutter {
+      0%   { transform: scale(0.9); opacity: 0; }
+      30%  { transform: scale(1.08); }
+      55%  { transform: scale(0.98); }
+      75%  { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeOrb {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.85); }
     }
 
     .whisper {
-      font-family: 'Inter';
+      font-family: 'Inter', sans-serif;
+      margin-top: 10px;
       opacity: 0;
       transform: translateY(10px);
     }
 
     .whisper.show {
-      animation: fadeIn 1.2s forwards;
+      animation: whisperIn 1.2s ease forwards;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes whisperIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+        font-size: 14px;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        font-size: 18px;
+      }
     }
 
-    .buttons { margin-top: 30px; opacity: 0; transition: .8s; }
+    .buttons {
+      margin-top: 30px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
 
     .button {
       display: block;
@@ -62,24 +103,30 @@
       margin: 12px auto;
       padding: 16px;
       border-radius: 999px;
-      border: 1px solid rgba(230,210,192,.25);
-      background: rgba(230,210,192,.06);
+      border: 1px solid rgba(230,210,192,0.25);
+      background: rgba(230,210,192,0.06);
       color: #E6D2C0;
-      font-family: 'Inter';
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
       cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.25s ease;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      background: rgba(230,210,192,0.14);
+      box-shadow: 0 0 20px rgba(230,210,192,0.25);
+      transform: scale(1.03);
     }
   </style>
 </head>
 
 <body>
+
 <div id="app"></div>
 
 <script>
-
-/* =========================
-   DEBUG
-========================= */
-function debugTag(t){ return `<div class="debug">${t}</div>`; }
 
 /* =========================
    URL STATE
@@ -90,21 +137,65 @@ const msg = params.get("msg");
 const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
-const bloop = params.get("bloop");
 
 /* =========================
-   HELPERS
+   INVITE TEXT (NEW FIX)
 ========================= */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function getInviteText() {
+  const invites = [
+    "…come play with me",
+    "I found something for us",
+    "don’t overthink this",
+    "just open this",
+    "this made me think of you"
+  ];
+  return invites[Math.floor(Math.random() * invites.length)];
+}
 
 /* =========================
-   SCRIPT ENGINE
+   SCRIPT ENGINE (LOCKED)
 ========================= */
 const scripts = {
   fate: [
     ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
     ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
+  ],
+  reconnect: [
+    ["Tell me what’s been on your mind.", "Let’s reset… just us.", "Come sit with me for a minute."],
+    ["I’m here… talk to me.", "That pulled me in.", "Don’t disappear now."]
+  ],
+  date: [
+    ["Tonight doesn’t need a plan.", "Don’t make me overthink this.", "You’ve had my attention all day."],
+    ["Careful… I might take you up on that.", "You’re starting something.", "What’s next?"]
+  ],
+  dinner: [
+    ["Stay in tonight", "Go out and see what happens", "Surprise me"],
+    ["Now I’m invested.", "You always do this.", "Where is this going?"]
   ]
+};
+
+/* =========================
+   B OPTIONS
+========================= */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+const bOptions = {
+  fate: {
+    yes: ["Let’s see where this goes","Your move","Alright… surprise me"],
+    no: ["Not now… but I’m curious","This isn’t over","Come back to this"]
+  },
+  reconnect: {
+    yes: ["Stay with me","I’m here","Talk to me"],
+    no: ["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"]
+  },
+  date: {
+    yes: ["Come closer","Keep going…","I’m listening"],
+    no: ["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"]
+  },
+  dinner: {
+    yes: ["Fine… I’m in","Pick for me","Let’s do something easy"],
+    no: ["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"]
+  }
 };
 
 /* =========================
@@ -121,130 +212,86 @@ function fadeTo(html){
 ========================= */
 function showHome(){
   fadeTo(`
-    ${debugTag("A • HOME")}
-    <h1>Welcome back</h1>
-    <div class="orb" onclick="showDirections()"></div>
+    <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
+    <h1>Welcome back.<br>Come play with me.</h1>
+    <div class="orb" style="opacity:1" onclick="showDirections()"></div>
   `);
 }
 
 function showDirections(){
   fadeTo(`
-    ${debugTag("A • STEP 1")}
     <h1>What are we feeling?</h1>
+    <button class="button" onclick="startMode('dinner')">Dinner</button>
+    <button class="button" onclick="startMode('date')">Date Night</button>
     <button class="button" onclick="startMode('fate')">Fate</button>
+    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
   `);
 }
 
 function startMode(mode){
-  const options = scripts[mode]?.[0] || ["Start"];
-  let html = `${debugTag("A • STEP 2")}`;
-
+  const options=scripts[mode][0];
+  let html=``;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
   });
-
   fadeTo(html);
 }
 
 /* =========================
-   SEND (UNCHANGED COPY)
+   SEND (FIXED — NO PHRASE)
 ========================= */
 function sendChoice(text,mode,nextStep){
 
   const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
-  const full=`just open this\n\n${link}`;
+
+  const inviteText = getInviteText();
+
+  const full=`${inviteText}\n\n${link}`;
 
   fadeTo(`
-    ${debugTag("A • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
     <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
   `);
 }
 
 /* =========================
-   B INVITE (UNCHANGED)
+   B FLOW (UNCHANGED FOR NOW)
 ========================= */
-if(msg && !accepted && !bloop){
+if(msg && !accepted){
+
+  const pool=bOptions[mode]||bOptions.date;
+  const yes=pick(pool.yes);
+  const no=pick(pool.no);
 
   fadeTo(`
-    ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
 
     <div id="whisper" class="whisper">…I hope you join me</div>
 
     <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">Yes</button>
-      <button class="button" onclick="goHome()">Not now</button>
+      <button class="button" onclick="accept()">${yes}</button>
+      <button class="button" onclick="goHome()">${no}</button>
     </div>
   `);
 
-  setTimeout(()=>document.getElementById("whisper").classList.add("show"),2000);
-  setTimeout(()=>document.getElementById("buttons").style.opacity=1,4200);
+  setTimeout(()=>{document.getElementById("whisper").classList.add("show");},2000);
+  setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},4200);
 }
-
-/* =========================
-   ✅ NEW: B RESPONSE (SAFE)
-========================= */
-else if(bloop){
-
-  const origin = decodeURIComponent(params.get("origin") || msg || "");
-  const options = scripts[mode]?.[1] || ["Keep going…","Try again","…"];
-
-  let html = `
-    ${debugTag("B • RESPONSE")}
-    <div class="hero">${origin}</div>
-  `;
-
-  options.forEach(o=>{
-    html += `<button class="button" onclick="bSend('${o}','${mode}',${step+1})">${o}</button>`;
-  });
-
-  fadeTo(html);
-}
-
-/* =========================
-   B SEND
-========================= */
-function bSend(text,mode,next){
-
-  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}&accepted=true`;
-  const full=`${text}\n\n${link}`;
-
-  fadeTo(`
-    ${debugTag("B • SEND")}
-    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
-  `);
-}
-
-/* =========================
-   A CONTINUE
-========================= */
 else if(msg && accepted){
 
-  const options = scripts[mode]?.[step-1] || ["…"];
-
-  let html = `${debugTag(`A • STEP ${step}`)}<div class="hero">${decodeURIComponent(msg)}</div>`;
-
+  const options=scripts[mode]?.[step-1]||["…"];
+  let html=`<div class="hero">${decodeURIComponent(msg)}</div>`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
-
   fadeTo(html);
 }
-
-/* =========================
-   DEFAULT
-========================= */
 else{
   showHome();
 }
 
-/* =========================
-   ACTIONS
-========================= */
 function accept(){
-  window.location.href=`?mode=${mode}&step=${step}&bloop=1&origin=${encodeURIComponent(msg)}`;
+  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
 }
 
 function goHome(){
@@ -252,5 +299,6 @@ function goHome(){
 }
 
 </script>
+
 </body>
 </html>
