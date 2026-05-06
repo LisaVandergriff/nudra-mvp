@@ -12,89 +12,84 @@
       background: #000;
       color: #E6D2C0;
       font-family: 'Cormorant Garamond', serif;
+      text-align: center;
+      padding: 40px 15px;
       margin: 0;
     }
 
-    .container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px 15px;
-    }
-
-    .inner {
-      width: 100%;
-      max-width: 420px;
+    #app {
+      transition: opacity 0.3s ease;
     }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
-    .subtle {
-      font-family: 'Inter', sans-serif;
-      color: #888;
-      font-size: 14px;
-      margin-top: 10px;
+    .hero {
+      font-size: clamp(24px, 4vw, 36px);
+      margin-bottom: 30px;
+    }
+
+    .orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 40px auto;
+      background: radial-gradient(circle, rgba(230,210,192,0.25), rgba(230,210,192,0.05));
+      box-shadow:
+        0 0 20px rgba(230,210,192,0.3),
+        0 0 60px rgba(230,210,192,0.15);
+      animation: pulse 3s infinite ease-in-out;
+      cursor: pointer;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     .button {
       display: block;
-      width: 100%;
-      margin: 12px 0;
+      width: 90%;
+      max-width: 320px;
+      margin: 14px auto;
       padding: 16px;
       border-radius: 999px;
       border: 1px solid rgba(230,210,192,0.25);
-      background: transparent;
+      background: rgba(230,210,192,0.06);
       color: #E6D2C0;
+      font-family: 'Inter', sans-serif;
       font-size: 16px;
       cursor: pointer;
+      backdrop-filter: blur(6px);
       transition: all 0.25s ease;
+      text-decoration: none;
     }
 
     .button:hover {
+      background: rgba(230,210,192,0.14);
       box-shadow: 0 0 20px rgba(230,210,192,0.25);
-      transform: scale(1.02);
+      transform: scale(1.03);
     }
 
-    .glow-orb {
-      width: 90px;
-      height: 90px;
-      margin: 0 auto 30px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(230,210,192,0.9), rgba(230,210,192,0.05));
-      box-shadow: 0 0 25px rgba(230,210,192,0.5);
-      animation: pulse 2.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%,100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.1); opacity: 1; }
+    .subtle {
+      font-size: 14px;
+      color: rgba(230,210,192,0.5);
+      margin-bottom: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="inner" id="app"></div>
-</div>
+<div id="app"></div>
 
 <script>
 
 /* =========================
-   SAFE DECODE
-========================= */
-function safeDecode(val) {
-  try { return decodeURIComponent(val || ""); }
-  catch { return val || ""; }
-}
-
-/* =========================
-   PARAMS
+   URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
@@ -103,161 +98,124 @@ const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
-const app = document.getElementById("app");
-
 /* =========================
-   SCRIPT ENGINE (UNCHANGED CORE)
+   SCRIPT ENGINE
 ========================= */
 const scripts = {
-
-  reconnect: {
-    opener: [
-      "Come sit with me for a minute.",
-      "Tell me what’s been on your mind.",
-      "Let’s reset… just us."
-    ],
-    responses: [
-      ["I’m here.", "Talk to me.", "Don’t rush this."],
-      ["Stay with me.", "That feels better.", "Keep going."]
-    ]
-  },
-
-  date: {
-    opener: [
-      "You’ve had my attention all day.",
-      "Tonight doesn’t need a plan.",
-      "Don’t make me overthink this."
-    ],
-    responses: [
-      ["Go on…", "I’m listening.", "You’ve got me."],
-      ["Okay… now what?", "You started this.", "I’m in."]
-    ]
-  },
-
-  fate: {
-    opener: [
-      "No thinking—first idea wins.",
-      "Flip a coin and commit.",
-      "You decide. No take-backs."
-    ],
-    responses: [
-      ["Alright…", "Let’s see.", "You picked this."],
-      ["No regrets.", "We’re doing this.", "Let’s go."]
-    ]
-  }
-
+  fate: [
+    ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
+    ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
+  ],
+  reconnect: [
+    ["Tell me what’s been on your mind.", "Let’s reset… just us.", "Come sit with me for a minute."],
+    ["I’m here… talk to me.", "That pulled me in.", "Don’t disappear now."]
+  ],
+  date: [
+    ["Tonight doesn’t need a plan.", "Don’t make me overthink this.", "You’ve had my attention all day."],
+    ["Careful… I might take you up on that.", "You’re starting something.", "What’s next?"]
+  ],
+  dinner: [
+    ["Stay in tonight", "Go out and see what happens", "Surprise me"],
+    ["Now I’m invested.", "You always do this.", "Where is this going?"]
+  ]
 };
 
 /* =========================
-   HOME (A START)
+   FADE
 ========================= */
-function showHome() {
-  app.innerHTML = `
-    <div class="glow-orb"></div>
-    <h1>Welcome back.<br>Come play with me.</h1>
+function fadeTo(html) {
+  const app = document.getElementById("app");
+  app.style.opacity = 0;
 
-    <button class="button" onclick="startMode('date')">Date Night</button>
-    <button class="button" onclick="startMode('fate')">Fate</button>
-    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
-  `;
+  setTimeout(() => {
+    app.innerHTML = html;
+    app.style.opacity = 1;
+  }, 200);
 }
 
 /* =========================
-   A FLOW
+   HOME (A)
 ========================= */
+function showHome() {
+  fadeTo(`
+    <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
+    <h1>Welcome back.<br>Come play with me.</h1>
+    <div class="orb" onclick="showDirections()"></div>
+  `);
+}
+
+function showDirections() {
+  fadeTo(`
+    <h1>What are we feeling?</h1>
+
+    <button class="button" onclick="startMode('dinner')">Dinner</button>
+    <button class="button" onclick="startMode('date')">Date Night</button>
+    <button class="button" onclick="startMode('fate')">Fate</button>
+    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
+  `);
+}
+
 function startMode(selectedMode) {
-
-  const options = scripts[selectedMode]?.opener || [];
-
-  window.currentMode = selectedMode;
-  window.currentOptions = options;
+  const options = scripts[selectedMode][0];
 
   let html = ``;
 
-  options.forEach((opt, i) => {
-    html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
+  options.forEach(opt => {
+    html += `<button class="button" onclick="sendChoice('${opt}', '${selectedMode}', 2)">${opt}</button>`;
   });
 
-  app.innerHTML = html;
+  fadeTo(html);
 }
 
 /* =========================
    SEND
 ========================= */
-function sendChoice(i) {
+function sendChoice(text, mode, nextStep) {
 
-  const text = window.currentOptions[i];
-  const nextStep = step + 1;
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
 
-  const link = `${window.location.origin}?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}`;
+  const fullMessage = `${text}\n\n${link}`;
 
-  app.innerHTML = `
-    <div class="glow-orb"></div>
-    <button class="button" onclick="window.location.href='sms:?body=${encodeURIComponent(link)}'">Send</button>
-    <button class="button" onclick="copyLink('${link}')">Copy</button>
-  `;
+  fadeTo(`
+    <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send</a>
+    <button class="button" onclick="copyMsg('${encodeURIComponent(fullMessage)}')">Copy</button>
+  `);
 }
 
-function copyLink(link) {
-  navigator.clipboard.writeText(link);
-  alert("Copied");
+function copyMsg(encoded) {
+  navigator.clipboard.writeText(decodeURIComponent(encoded));
 }
 
 /* =========================
-   B ENTRY (ONLY NEW PART)
+   B EXPERIENCE
 ========================= */
-function showBEntry() {
-  app.innerHTML = `
-    <h1 style="font-size:28px; font-weight:400;">
-      ${safeDecode(msg)}
-    </h1>
+if (msg && !accepted) {
 
-    <div class="subtle">…you don’t have to decide anything yet</div>
+  fadeTo(`
+    <div class="hero">${decodeURIComponent(msg)}</div>
 
-    <div class="glow-orb"></div>
+    <div class="subtle">Do you want to play?</div>
 
-    <button class="button" onclick="accept()">Stay a minute</button>
-    <button class="button" onclick="showHome()">Maybe later</button>
-  `;
-}
+    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
+    <a href="/" class="button">Not now</a>
+  `);
 
-/* =========================
-   ACCEPT
-========================= */
-function accept() {
-  window.location.href = `${window.location.origin}?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
-}
+} else if (msg && accepted) {
 
-/* =========================
-   CONTINUE FLOW (UNCHANGED)
-========================= */
-function showContinuation() {
+  const options = scripts[mode]?.[step - 1] || ["…"];
 
-  const options = scripts[mode]?.responses[step - 1] || [];
+  let html = `<div class="hero">${decodeURIComponent(msg)}</div>`;
 
-  window.currentMode = mode;
-  window.currentOptions = options;
-
-  let html = `<h1>${safeDecode(msg)}</h1>`;
-
-  options.forEach((opt, i) => {
-    html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
+  options.forEach(opt => {
+    html += `<button class="button" onclick="sendChoice('${opt}', '${mode}', ${step + 1})">${opt}</button>`;
   });
 
-  app.innerHTML = html;
-}
+  fadeTo(html);
 
-/* =========================
-   ROUTER (FIXED, NOT CHANGED FLOW)
-========================= */
-if (!msg) {
+} else {
+
   showHome();
-}
-else if (!accepted) {
-  showBEntry();
-}
-else {
-  showContinuation();
+
 }
 
 </script>
