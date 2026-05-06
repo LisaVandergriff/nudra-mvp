@@ -26,6 +26,11 @@
       margin-bottom: 30px;
     }
 
+    .hero {
+      font-size: clamp(24px, 4vw, 36px);
+      margin-bottom: 30px;
+    }
+
     .orb {
       width: 120px;
       height: 120px;
@@ -68,52 +73,55 @@
       box-shadow: 0 0 20px rgba(230,210,192,0.25);
       transform: scale(1.03);
     }
+
+    .subtle {
+      font-size: 14px;
+      color: rgba(230,210,192,0.5);
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 
 <body>
 
-<div id="app">
-
-  <!-- OPEN SCREEN -->
-  <div>
-    <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
-    <h1>Welcome back.<br>Come play with me.</h1>
-    <div class="orb" onclick="showDirections()"></div>
-  </div>
-
-</div>
+<div id="app"></div>
 
 <script>
 
 /* =========================
-   SCRIPT OPTIONS (NO DUPES)
+   URL STATE
+========================= */
+const params = new URLSearchParams(window.location.search);
+
+const msg = params.get("msg");
+const mode = params.get("mode");
+const step = parseInt(params.get("step") || "1");
+const accepted = params.get("accepted");
+
+/* =========================
+   SCRIPT ENGINE
 ========================= */
 const scripts = {
   fate: [
-    "Flip a coin and commit.",
-    "You decide. No take-backs.",
-    "No thinking—first idea wins."
+    ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
+    ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
   ],
   reconnect: [
-    "Tell me what’s been on your mind.",
-    "Let’s reset… just us.",
-    "Come sit with me for a minute."
+    ["Tell me what’s been on your mind.", "Let’s reset… just us.", "Come sit with me for a minute."],
+    ["I’m here… talk to me.", "That pulled me in.", "Don’t disappear now."]
   ],
   date: [
-    "Tonight doesn’t need a plan.",
-    "Don’t make me overthink this.",
-    "You’ve had my attention all day."
+    ["Tonight doesn’t need a plan.", "Don’t make me overthink this.", "You’ve had my attention all day."],
+    ["Careful… I might take you up on that.", "You’re starting something.", "What’s next?"]
   ],
   dinner: [
-    "Stay in tonight",
-    "Go out and see what happens",
-    "Surprise me"
+    ["Stay in tonight", "Go out and see what happens", "Surprise me"],
+    ["Now I’m invested.", "You always do this.", "Where is this going?"]
   ]
 };
 
 /* =========================
-   FADE TRANSITION
+   FADE
 ========================= */
 function fadeTo(html) {
   const app = document.getElementById("app");
@@ -126,8 +134,16 @@ function fadeTo(html) {
 }
 
 /* =========================
-   STEP 1: DIRECTIONS
+   HOME (A)
 ========================= */
+function showHome() {
+  fadeTo(`
+    <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
+    <h1>Welcome back.<br>Come play with me.</h1>
+    <div class="orb" onclick="showDirections()"></div>
+  `);
+}
+
 function showDirections() {
   fadeTo(`
     <h1>What are we feeling?</h1>
@@ -139,49 +155,67 @@ function showDirections() {
   `);
 }
 
-/* =========================
-   STEP 2: OPTIONS (NO HEADER)
-========================= */
-function startMode(mode) {
-
-  const options = scripts[mode];
+function startMode(selectedMode) {
+  const options = scripts[selectedMode][0];
 
   let html = ``;
 
   options.forEach(opt => {
-    html += `<button class="button" onclick="sendChoice('${opt}')">${opt}</button>`;
+    html += `<button class="button" onclick="sendChoice('${opt}', '${selectedMode}', 2)">${opt}</button>`;
   });
 
   fadeTo(html);
 }
 
 /* =========================
-   STEP 3: SEND (CLEAN)
+   SEND
 ========================= */
-function sendChoice(text) {
+function sendChoice(text, mode, nextStep) {
 
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
 
-  // IMPORTANT: include phrase in message, not UI
   const fullMessage = `${text}\n\n${link}`;
 
   fadeTo(`
-
     <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send</a>
-
-    <button class="button" onclick="copyMsg('${encodeURIComponent(fullMessage)}')">
-      Copy
-    </button>
-
+    <button class="button" onclick="copyMsg('${encodeURIComponent(fullMessage)}')">Copy</button>
   `);
 }
 
-/* =========================
-   COPY HELPER
-========================= */
 function copyMsg(encoded) {
-  const decoded = decodeURIComponent(encoded);
-  navigator.clipboard.writeText(decoded);
+  navigator.clipboard.writeText(decodeURIComponent(encoded));
+}
+
+/* =========================
+   B EXPERIENCE
+========================= */
+if (msg && !accepted) {
+
+  fadeTo(`
+    <div class="hero">${decodeURIComponent(msg)}</div>
+
+    <div class="subtle">Do you want to play?</div>
+
+    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
+    <a href="/" class="button">Not now</a>
+  `);
+
+} else if (msg && accepted) {
+
+  const options = scripts[mode]?.[step - 1] || ["…"];
+
+  let html = `<div class="hero">${decodeURIComponent(msg)}</div>`;
+
+  options.forEach(opt => {
+    html += `<button class="button" onclick="sendChoice('${opt}', '${mode}', ${step + 1})">${opt}</button>`;
+  });
+
+  fadeTo(html);
+
+} else {
+
+  showHome();
+
 }
 
 </script>
