@@ -16,49 +16,38 @@
       margin:0;
     }
 
-    #app { transition: opacity 0.4s ease; }
-
-    h1 { font-size: clamp(28px,5vw,42px); margin-bottom:40px; }
+    #app { transition: opacity .4s ease; }
 
     .hero { font-size: clamp(26px,4vw,36px); margin-bottom:20px; }
 
-    /* DEBUG */
     .debug {
-      position:fixed;
-      top:10px;
-      left:10px;
-      font-family:Inter,sans-serif;
-      font-size:12px;
-      color:#aaa;
-      opacity:.6;
-      letter-spacing:1px;
-      z-index:999;
+      position:fixed; top:10px; left:10px;
+      font-family:Inter; font-size:12px;
+      color:#aaa; opacity:.6;
     }
 
     .orb {
       width:120px;height:120px;border-radius:50%;
       margin:40px auto;
       background:radial-gradient(circle,rgba(230,210,192,.35),rgba(230,210,192,.05));
-      box-shadow:0 0 25px rgba(230,210,192,.4),0 0 70px rgba(230,210,192,.2);
+      box-shadow:0 0 25px rgba(230,210,192,.4);
     }
 
     .whisper {
-      font-family:'Inter',sans-serif;
-      margin-top:10px;
+      font-family:'Inter';
       opacity:0;
       transform:translateY(10px);
     }
 
     .whisper.show {
-      animation: whisperIn 1.2s ease forwards;
+      animation: fadeIn 1.2s forwards;
     }
 
-    @keyframes whisperIn {
-      0% { opacity:0; transform:translateY(10px); font-size:14px; }
-      100% { opacity:1; transform:translateY(0); font-size:18px; }
+    @keyframes fadeIn {
+      to { opacity:1; transform:translateY(0); }
     }
 
-    .buttons { margin-top:30px; opacity:0; transition:opacity .8s ease; }
+    .buttons { margin-top:30px; opacity:0; transition:.8s; }
 
     .button {
       display:block;
@@ -69,17 +58,8 @@
       border:1px solid rgba(230,210,192,.25);
       background:rgba(230,210,192,.06);
       color:#E6D2C0;
-      font-family:'Inter',sans-serif;
-      font-size:16px;
+      font-family:'Inter';
       cursor:pointer;
-      backdrop-filter:blur(6px);
-      transition:.25s;
-    }
-
-    .button:hover {
-      background:rgba(230,210,192,.14);
-      box-shadow:0 0 20px rgba(230,210,192,.25);
-      transform:scale(1.03);
     }
   </style>
 </head>
@@ -90,65 +70,41 @@
 <script>
 
 /* =========================
-   DEBUG HELPER
+   DEBUG
 ========================= */
-function debugTag(label){
-  return `<div class="debug">${label}</div>`;
-}
+function debugTag(t){ return `<div class="debug">${t}</div>`; }
 
 /* =========================
    URL STATE
 ========================= */
-const params = new URLSearchParams(window.location.search);
+const p = new URLSearchParams(location.search);
 
-const msg = params.get("msg");
-const mode = params.get("mode");
-const step = parseInt(params.get("step") || "1");
-const accepted = params.get("accepted");
-const bloop = params.get("bloop"); // <-- B response mode
+const msg = p.get("msg");
+const mode = p.get("mode");
+const step = parseInt(p.get("step")||1);
+const accepted = p.get("accepted");
+const bloop = p.get("bloop");
 
 /* =========================
    HELPERS
 ========================= */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 
 /* =========================
-   SCRIPT ENGINE (A/B shared)
+   SCRIPT ENGINE
 ========================= */
 const scripts = {
   fate:[
-    ["Flip a coin and commit.","You decide. No take-backs.","No thinking—first idea wins."],
+    ["Flip a coin and commit.","You decide.","No thinking—first idea wins."],
     ["Well… now I’m curious.","You really went with that?","Alright… I’m in."]
-  ],
-  reconnect:[
-    ["Tell me what’s been on your mind.","Let’s reset… just us.","Come sit with me for a minute."],
-    ["I’m here… talk to me.","That pulled me in.","Don’t disappear now."]
-  ],
-  date:[
-    ["Tonight doesn’t need a plan.","Don’t make me overthink this.","You’ve had my attention all day."],
-    ["Careful… I might take you up on that.","You’re starting something.","What’s next?"]
-  ],
-  dinner:[
-    ["Stay in tonight","Go out and see what happens","Surprise me"],
-    ["Now I’m invested.","You always do this.","Where is this going?"]
   ]
 };
 
 /* =========================
-   B OPTIONS (YES / SOFT NO)
+   FADE
 ========================= */
-const bOptions = {
-  fate:{ yes:["Let’s see where this goes","Your move","Alright… surprise me"], no:["Not now… but I’m curious","This isn’t over","Come back to this"] },
-  reconnect:{ yes:["Stay with me","I’m here","Talk to me"], no:["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"] },
-  date:{ yes:["Come closer","Keep going…","I’m listening"], no:["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"] },
-  dinner:{ yes:["Fine… I’m in","Pick for me","Let’s do something easy"], no:["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"] }
-};
-
-/* =========================
-   FADE HELPER
-========================= */
-function fadeTo(html){
-  const app=document.getElementById("app");
+function fade(html){
+  const app = document.getElementById("app");
   app.style.opacity=0;
   setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
 }
@@ -156,138 +112,139 @@ function fadeTo(html){
 /* =========================
    A FLOW (LOCKED)
 ========================= */
-function showHome(){
-  fadeTo(`
+function home(){
+  fade(`
     ${debugTag("A • HOME")}
-    <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
-    <h1>Welcome back.<br>Come play with me.</h1>
-    <div class="orb" onclick="showDirections()"></div>
+    <h1>Welcome back</h1>
+    <div class="orb" onclick="modes()"></div>
   `);
 }
 
-function showDirections(){
-  fadeTo(`
+function modes(){
+  fade(`
     ${debugTag("A • STEP 1")}
     <h1>What are we feeling?</h1>
-    <button class="button" onclick="startMode('dinner')">Dinner</button>
-    <button class="button" onclick="startMode('date')">Date Night</button>
-    <button class="button" onclick="startMode('fate')">Fate</button>
-    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
+    <button class="button" onclick="start('fate')">Fate</button>
   `);
 }
 
-function startMode(mode){
-  const options=scripts[mode][0];
-  let html=`${debugTag("A • STEP 2")}`;
-  options.forEach(o=>{
-    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
+function start(m){
+  let html = `${debugTag("A • STEP 2")}`;
+  scripts[m][0].forEach(o=>{
+    html+=`<button class="button" onclick="send('${o}','${m}',2)">${o}</button>`;
   });
-  fadeTo(html);
+  fade(html);
 }
 
 /* =========================
-   A SEND
+   A SEND (FIXED COPY)
 ========================= */
-function sendChoice(text,mode,nextStep){
-  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+function send(text,mode,next){
+
+  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}`;
+
   const full=`just open this\n\n${link}`;
 
-  fadeTo(`
+  fade(`
     ${debugTag("A • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="navigator.clipboard.writeText('${full}')">Copy</button>
+    <button class="button" onclick="copyText(\`${full}\`)">Copy</button>
   `);
 }
 
 /* =========================
-   B INVITE (FIRST ENTRY)
+   COPY (REAL FIX)
+========================= */
+function copyText(t){
+  navigator.clipboard.writeText(t)
+    .then(()=>alert("Copied"))
+    .catch(()=>alert("Copy failed"));
+}
+
+/* =========================
+   B INVITE
 ========================= */
 if(msg && !accepted && !bloop){
 
-  const pool=bOptions[mode]||bOptions.date;
-
-  fadeTo(`
+  fade(`
     ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
+    <div id="w" class="whisper">…I hope you join me</div>
 
-    <div id="whisper" class="whisper">…I hope you join me</div>
-
-    <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">Let’s see where this goes</button>
-      <button class="button" onclick="goHome()">Not now… but I’m curious</button>
+    <div id="btn" class="buttons">
+      <button class="button" onclick="accept()">Yes</button>
+      <button class="button" onclick="home()">Not now</button>
     </div>
   `);
 
-  setTimeout(()=>{document.getElementById("whisper").classList.add("show");},2000);
-  setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},4200);
+  setTimeout(()=>w.classList.add("show"),2000);
+  setTimeout(()=>btn.style.opacity=1,4000);
 }
 
 /* =========================
-   B RESPONSE (NEW ENGINE STEP)
+   B RESPONSE (NEW)
 ========================= */
 else if(bloop){
 
-  const origin = decodeURIComponent(params.get("origin") || "");
-  const options = scripts[mode]?.[step-1] || ["…"];
+  const origin = decodeURIComponent(p.get("origin"));
 
   let html = `
-    ${debugTag(`B • STEP ${step} RESPONSE`)}
+    ${debugTag("B • RESPONSE")}
     <div class="hero">${origin}</div>
   `;
 
-  options.forEach(o=>{
-    html+=`<button class="button" onclick="bSendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  scripts[mode][1].forEach(o=>{
+    html+=`<button class="button" onclick="bSend('${o}','${mode}',${step+1})">${o}</button>`;
   });
 
-  fadeTo(html);
+  fade(html);
 }
 
 /* =========================
-   A CONTINUES AFTER B
+   B SEND → BACK TO A
+========================= */
+function bSend(text,mode,next){
+
+  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}&accepted=true`;
+
+  const full=`${text}\n\n${link}`;
+
+  fade(`
+    ${debugTag("B • SEND")}
+    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
+    <button class="button" onclick="copyText(\`${full}\`)">Copy</button>
+  `);
+}
+
+/* =========================
+   A CONTINUE
 ========================= */
 else if(msg && accepted){
 
-  const options=scripts[mode]?.[step-1]||["…"];
+  let html = `
+    ${debugTag("A • STEP "+step)}
+    <div class="hero">${decodeURIComponent(msg)}</div>
+  `;
 
-  let html=`${debugTag(`A • STEP ${step}`)}<div class="hero">${decodeURIComponent(msg)}</div>`;
-
-  options.forEach(o=>{
-    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  scripts[mode][1].forEach(o=>{
+    html+=`<button class="button" onclick="send('${o}','${mode}',${step+1})">${o}</button>`;
   });
 
-  fadeTo(html);
+  fade(html);
 }
 
 /* =========================
    DEFAULT
 ========================= */
 else{
-  showHome();
+  home();
 }
 
 /* =========================
    ACTIONS
 ========================= */
-
 function accept(){
-  window.location.href=`?mode=${mode}&step=${step}&bloop=1&origin=${encodeURIComponent(msg)}`;
-}
-
-function bSendChoice(text,mode,nextStep){
-
-  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`;
-
-  const full=`${text}\n\n${link}`;
-
-  fadeTo(`
-    ${debugTag("B • SEND")}
-    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="navigator.clipboard.writeText('${full}')">Copy</button>
-  `);
-}
-
-function goHome(){
-  window.location.href="/";
+  location.href=`?mode=${mode}&step=${step}&bloop=1&origin=${encodeURIComponent(msg)}`;
 }
 
 </script>
