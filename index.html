@@ -3,13 +3,11 @@
 <head>
   <title>Nudra</title>
 
-  <!-- Mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
-  <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
 
   <style>
@@ -23,7 +21,6 @@
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 10px;
     }
 
     p, .button, .tone {
@@ -40,25 +37,23 @@
       border: none;
       background: #E6D2C0;
       color: #000;
-      font-size: clamp(14px, 4vw, 18px);
+      font-size: 16px;
       cursor: pointer;
       text-decoration: none;
     }
 
     #result {
       margin-top: 30px;
-      font-size: clamp(20px, 5vw, 30px);
-    }
-
-    .tone {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #aaa;
     }
 
     .hero {
-      font-size: clamp(28px, 6vw, 44px);
-      margin-top: 20px;
+      font-size: 30px;
+      margin: 20px 0;
+    }
+
+    .tone {
+      color: #aaa;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -68,7 +63,6 @@
 <h1>So… what kind of trouble are we getting into?</h1>
 <p>Pick a mood. I’ll take it from there.</p>
 
-<button class="button" onclick="startMode('dinner')">🍽️ Dinner</button>
 <button class="button" onclick="startMode('date')">🖤 Date Night</button>
 <button class="button" onclick="startMode('fate')">🎲 Fate</button>
 <button class="button" onclick="startMode('reconnect')">💬 Reconnect</button>
@@ -78,159 +72,123 @@
 <script>
 
 /* =========================
-   TRACKING (safe if undefined)
-========================= */
-function track(event, data = {}) {
-  if (window.va) window.va('event', event, data);
-}
-
-/* =========================
    URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
-const incoming = params.get("msg");
+const msg = params.get("msg");
 const mode = params.get("mode");
-const thread = params.get("thread") || Date.now();
+const step = parseInt(params.get("step") || "1");
+const accepted = params.get("accepted");
 
 /* =========================
-   RESPONSE ENGINE (FIXED)
+   MODE SCRIPTS (NO DUPES)
 ========================= */
-function getResponses(mode) {
+const scripts = {
+  reconnect: [
+    ["Come sit with me for a minute.", "Tell me what’s been on your mind.", "Let’s reset… just us."],
+    ["You always know how to pull me in.", "Alright… I’m here.", "Talk to me… I’m listening."],
+    ["That’s exactly what I needed.", "Don’t disappear on me now.", "Stay right here with me."]
+  ],
 
-  if (mode === "date") {
-    return [
-      "You’ve had my attention all day.",
-      "Tonight doesn’t need a plan.",
-      "Don’t make me overthink this."
-    ];
-  }
+  date: [
+    ["You’ve had my attention all day.", "Tonight doesn’t need a plan.", "Don’t make me overthink this."],
+    ["Careful… I might take you up on that.", "You’re starting something here.", "Alright… what’s next?"],
+    ["No backing out now.", "You win.", "Guess we’re doing this."]
+  ],
 
-  if (mode === "dinner") {
-    return [
-      "Pick a place. I’m in.",
-      "You choose… I’ll handle the rest.",
-      "Something easy… then we stay in 😏"
-    ];
-  }
+  fate: [
+    ["No thinking—first idea wins.", "Flip a coin and commit.", "You decide. No take-backs."],
+    ["Well… now I’m curious.", "You really went with that?", "Okay… I’m in."],
+    ["Guess fate made the call.", "That escalated quickly.", "No regrets."]
+  ]
+};
 
-  if (mode === "fate") {
-    return [
-      "No thinking—first idea wins.",
-      "Flip a coin and commit.",
-      "You decide. No take-backs."
-    ];
-  }
-
-  if (mode === "reconnect") {
-    return [
-      "Come sit with me for a minute.",
-      "Tell me what’s been on your mind.",
-      "Let’s reset… just us."
-    ];
-  }
-
-  return ["Try again."];
+/* =========================
+   STEP OPTIONS
+========================= */
+function getOptions(mode, step) {
+  const script = scripts[mode] || [];
+  return script[step - 1] || ["…"];
 }
 
 /* =========================
-   INCOMING FLOW (FIXED)
-   NO RETURN / NO BREAKING SCRIPT
-========================= */
-if (incoming) {
-
-  track("incoming_open", { mode });
-
-  const responses = getResponses(mode);
-
-  document.body.innerHTML = `
-    <h1>Showing your brave side, I see.</h1>
-
-    <div id="result">
-      <div class="hero">${decodeURIComponent(incoming)}</div>
-      <div class="tone">Your turn…</div>
-      <br>
-
-      ${responses.map((r, i) => `
-        <button class="button" onclick="sendChoice(${i})">${r}</button>
-      `).join("")}
-
-    </div>
-  `;
-
-  window.currentOptions = responses;
-  window.currentMode = mode;
-
-}
-
-/* =========================
-   START MODE (INITIATOR)
+   START MODE
 ========================= */
 function startMode(selectedMode) {
-
-  track("mode_selected", { mode: selectedMode });
-
-  const options = getResponses(selectedMode);
-
-  window.currentOptions = options;
+  const options = getOptions(selectedMode, 1);
   window.currentMode = selectedMode;
+  window.currentOptions = options;
 
-  renderOptions("Pick your move...", options);
+  render(options, "Pick your move…");
 }
 
 /* =========================
-   RENDER OPTIONS
+   RENDER BUTTONS
 ========================= */
-function renderOptions(title, options) {
-
+function render(options, title) {
   let html = `<div class="tone">${title}</div><br>`;
 
-  options.forEach((opt, index) => {
-    html += `<button class="button" onclick="sendChoice(${index})">${opt}</button>`;
+  options.forEach((opt, i) => {
+    html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
   });
 
   document.getElementById("result").innerHTML = html;
 }
 
 /* =========================
-   SEND MESSAGE (CORE LOOP)
+   SEND MESSAGE (LINK ONLY)
 ========================= */
-function sendChoice(index) {
+function sendChoice(i) {
+  const text = window.currentOptions[i];
+  const nextStep = step + 1;
 
-  const text = window.currentOptions[index];
-
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&thread=${thread}`;
-
-  const fullMessage = `${text} 😏\n\n${link}`;
-
-  track("message_sent", { text, mode: window.currentMode });
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}&accepted=true`;
 
   document.body.innerHTML = `
     <h1>Send it…</h1>
+    <div class="hero">${text}</div>
 
-    <div id="result">
-
-      <div class="tone">${text}</div>
-
-      <br><br>
-
-      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
-
-      <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">Email it</a>
-
-      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">Copy</button>
-
-    </div>
+    <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
+    <a href="mailto:?subject=Nudra&body=${encodeURIComponent(link)}" class="button">Email it</a>
   `;
 }
 
 /* =========================
-   COPY FUNCTION
+   INCOMING FLOW
 ========================= */
-function copyMessage(encoded) {
-  const decoded = decodeURIComponent(encoded);
-  navigator.clipboard.writeText(decoded);
-  alert("Copied");
+if (msg && !accepted) {
+
+  // ONE-TIME ACCEPT SCREEN
+  document.body.innerHTML = `
+    <h1>Psst…</h1>
+
+    <div class="hero">${decodeURIComponent(msg)}</div>
+    <div class="tone">Do you want to play?</div>
+
+    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
+    <a href="/" class="button">Not now</a>
+  `;
+
+} else if (msg && accepted) {
+
+  // CONTINUATION FLOW
+  const options = getOptions(mode, step);
+
+  window.currentMode = mode;
+  window.currentOptions = options;
+
+  document.body.innerHTML = `
+    <h1>Showing your brave side, I see.</h1>
+
+    <div class="hero">${decodeURIComponent(msg)}</div>
+    <div class="tone">Your turn…</div>
+
+    <div id="result"></div>
+  `;
+
+  render(options, "");
+
 }
 
 </script>
