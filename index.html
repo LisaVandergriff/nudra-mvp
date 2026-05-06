@@ -275,7 +275,18 @@ function sendChoice(text,mode,nextStep){
 /* =========================
    B FLOW (UNCHANGED FOR NOW)
 ========================= */
-if(msg && !accepted && !bStep){
+ if(bStep === "1"){
+  const options = bOptions[mode] || bOptions.date;
+  let html = `${debugTag("B • STEP 1A")}`;
+  html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
+  options.yes.forEach(o=>{
+    html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  });
+  html += `<button class="button" onclick="goHome()">Not now</button>`;
+  fadeTo(html);
+} 
+  
+else if(msg && !accepted && !bStep){
 
   const pool=bOptions[mode]||bOptions.date;
   const yes=pick(pool.yes);
