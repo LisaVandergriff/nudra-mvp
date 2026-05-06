@@ -28,14 +28,14 @@
 
     .hero {
       font-size: clamp(24px, 4vw, 36px);
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
 
     .orb {
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      margin: 40px auto;
+      margin: 30px auto;
       background: radial-gradient(circle, rgba(230,210,192,0.25), rgba(230,210,192,0.05));
       box-shadow:
         0 0 20px rgba(230,210,192,0.3),
@@ -79,6 +79,13 @@
       color: rgba(230,210,192,0.5);
       margin-bottom: 10px;
     }
+
+    .whisper {
+      font-size: 16px;
+      color: rgba(230,210,192,0.6);
+      margin: 20px 0 10px;
+      font-family: 'Inter', sans-serif;
+    }
   </style>
 </head>
 
@@ -99,7 +106,7 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE
+   SCRIPT ENGINE (UNCHANGED)
 ========================= */
 const scripts = {
   fate: [
@@ -168,7 +175,7 @@ function startMode(selectedMode) {
 }
 
 /* =========================
-   SEND
+   SEND (UNCHANGED)
 ========================= */
 function sendChoice(text, mode, nextStep) {
 
@@ -187,17 +194,19 @@ function copyMsg(encoded) {
 }
 
 /* =========================
-   B EXPERIENCE
+   B EXPERIENCE (UPGRADED ONLY)
 ========================= */
 if (msg && !accepted) {
 
   fadeTo(`
     <div class="hero">${decodeURIComponent(msg)}</div>
 
-    <div class="subtle">Do you want to play?</div>
+    <div class="orb"></div>
 
-    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
-    <a href="/" class="button">Not now</a>
+    <div class="whisper">…you can ignore this<br>or lean into it</div>
+
+    <button class="button" onclick="accept()">Stay a minute</button>
+    <button class="button" onclick="goHome()">Not now</button>
   `);
 
 } else if (msg && accepted) {
@@ -216,6 +225,17 @@ if (msg && !accepted) {
 
   showHome();
 
+}
+
+/* =========================
+   NAV
+========================= */
+function accept() {
+  window.location.href = `?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
+}
+
+function goHome() {
+  window.location.href = "/";
 }
 
 </script>
