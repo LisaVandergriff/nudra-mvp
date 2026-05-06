@@ -9,7 +9,7 @@
   <!-- Premium Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
-  <!-- Vercel Analytics (safe to keep, ignore 404 locally) -->
+  <!-- Vercel Analytics -->
   <script defer src="/_vercel/insights/script.js"></script>
 
   <style>
@@ -23,7 +23,6 @@
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 10px;
     }
 
     p, .button, .tone, .subtle {
@@ -40,14 +39,17 @@
       border: none;
       background: #E6D2C6;
       color: #000;
-      font-size: clamp(14px, 4vw, 18px);
       cursor: pointer;
       text-decoration: none;
     }
 
     #result {
       margin-top: 30px;
-      font-size: clamp(20px, 5vw, 30px);
+    }
+
+    .hero {
+      font-size: clamp(28px, 6vw, 44px);
+      margin-top: 20px;
     }
 
     .tone {
@@ -57,14 +59,8 @@
     }
 
     .section-title {
-      font-size: 20px;
       margin-top: 30px;
       color: #ccc;
-    }
-
-    .hero {
-      font-size: clamp(28px, 6vw, 44px);
-      margin-top: 20px;
     }
   </style>
 </head>
@@ -84,14 +80,14 @@
 <script>
 
 /* =========================
-   TRACKING HELPER
+   TRACKING
 ========================= */
 function track(event, data = {}) {
   if (window.va) window.va('event', event, data);
 }
 
 /* =========================
-   URL STATE (CORE ENGINE)
+   URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
@@ -100,12 +96,11 @@ const mode = params.get("mode");
 const thread = params.get("thread") || Date.now();
 
 /* =========================
-   CONTINUATION FLOW (RECEIVER VIEW)
-   If message exists → CONTINUE conversation
+   CONTINUE FLOW (RECEIVER)
 ========================= */
 if (incoming) {
 
-  track("incoming_open", { mode });
+  console.log("Incoming message:", incoming);
 
   const responses = getResponses(mode);
 
@@ -130,15 +125,16 @@ if (incoming) {
   window.currentOptions = responses;
   window.currentMode = mode;
 
-  throw new Error("stop render");
+  // ✅ STOP safely (no crash)
+  return;
 }
 
 /* =========================
-   START MODE (INITIAL USER)
+   START MODE (MAIN USER)
 ========================= */
 function startMode(selectedMode) {
 
-  track("mode_selected", { mode: selectedMode });
+  console.log("Mode selected:", selectedMode);
 
   const options = getResponses(selectedMode);
 
@@ -149,8 +145,7 @@ function startMode(selectedMode) {
 }
 
 /* =========================
-   RESPONSE ENGINE (FIXED ISSUE)
-   Each mode now has UNIQUE responses
+   RESPONSE ENGINE
 ========================= */
 function getResponses(mode) {
 
@@ -186,7 +181,12 @@ function getResponses(mode) {
     ];
   }
 
-  return ["Hmm… try again."];
+  // ✅ fallback so nothing breaks
+  return [
+    "Alright… your move.",
+    "Don’t overthink it.",
+    "Go with your instinct."
+  ];
 }
 
 /* =========================
@@ -204,8 +204,7 @@ function renderOptions(title, options) {
 }
 
 /* =========================
-   SEND MESSAGE (CORE LOOP)
-   Builds message + keeps thread + mode alive
+   SEND MESSAGE
 ========================= */
 function sendChoice(index) {
 
@@ -215,7 +214,7 @@ function sendChoice(index) {
 
   const fullMessage = `${text} 😏\n\n${link}`;
 
-  track("message_sent", { text, mode: window.currentMode });
+  console.log("Sending:", fullMessage);
 
   document.body.innerHTML = `
     <h1>Send it…</h1>
@@ -237,7 +236,7 @@ function sendChoice(index) {
 }
 
 /* =========================
-   COPY HELPER
+   COPY
 ========================= */
 function copyMessage(encoded) {
   const decoded = decodeURIComponent(encoded);
