@@ -13,11 +13,7 @@
       font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
-      opacity: 0;
-      animation: fadeIn 0.8s ease forwards;
     }
-
-    @keyframes fadeIn { to { opacity: 1; } }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
@@ -43,12 +39,6 @@
       color: #E6D2C0;
       font-size: 16px;
       cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .button:hover {
-      box-shadow: 0 0 20px rgba(230,210,192,0.25);
-      transform: scale(1.03);
     }
 
     .glow-orb {
@@ -58,12 +48,6 @@
       border-radius: 50%;
       background: radial-gradient(circle, rgba(230,210,192,0.9), rgba(230,210,192,0.05));
       box-shadow: 0 0 25px rgba(230,210,192,0.5);
-      animation: pulse 2.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%,100% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.1); opacity: 1; }
     }
   </style>
 </head>
@@ -74,6 +58,21 @@
 
 <script>
 
+/* =========================
+   SAFE HELPERS
+========================= */
+function safeDecode(val) {
+  try { return decodeURIComponent(val || ""); }
+  catch { return val || ""; }
+}
+
+function render(html) {
+  document.getElementById("app").innerHTML = html;
+}
+
+/* =========================
+   URL PARAMS
+========================= */
 const params = new URLSearchParams(window.location.search);
 
 const msg = params.get("msg");
@@ -81,16 +80,11 @@ const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
-const app = document.getElementById("app");
-
-function render(html) {
-  app.innerHTML = html;
-}
-
 /* =========================
-   SCRIPTS
+   SCRIPT DATA
 ========================= */
 const scripts = {
+
   reconnect: {
     opener: [
       "Come sit with me for a minute.",
@@ -99,7 +93,7 @@ const scripts = {
     ],
     responses: [
       ["I’m here.", "Talk to me.", "Don’t rush this."],
-      ["That feels better already.", "Stay with me.", "Keep going."]
+      ["Stay with me.", "That feels better.", "Keep going."]
     ]
   },
 
@@ -110,7 +104,7 @@ const scripts = {
       "Don’t make me overthink this."
     ],
     responses: [
-      ["Go on…", "You’ve got me.", "I’m listening."],
+      ["Go on…", "I’m listening.", "You’ve got me."],
       ["Okay… now what?", "You started this.", "I’m in."]
     ]
   },
@@ -126,10 +120,11 @@ const scripts = {
       ["No regrets.", "We’re doing this.", "Let’s go."]
     ]
   }
+
 };
 
 /* =========================
-   DEFAULT (A landing)
+   HOME
 ========================= */
 function showHome() {
   render(`
@@ -146,14 +141,15 @@ function showHome() {
    A FLOW
 ========================= */
 function startMode(selectedMode) {
-  const options = scripts[selectedMode].opener;
+  const script = scripts[selectedMode];
+  if (!script) return showHome();
 
   window.currentMode = selectedMode;
-  window.currentOptions = options;
+  window.currentOptions = script.opener;
 
   let html = "";
 
-  options.forEach((opt, i) => {
+  script.opener.forEach((opt, i) => {
     html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
   });
 
@@ -182,12 +178,13 @@ function copyLink(link) {
 }
 
 /* =========================
-   B FIRST EXPERIENCE
+   B ENTRY
 ========================= */
 function showBEntry() {
+
   render(`
     <h1 style="font-size:28px; font-weight:400;">
-      ${decodeURIComponent(msg)}
+      ${safeDecode(msg)}
     </h1>
 
     <div class="subtle">…you don’t have to decide anything yet</div>
@@ -208,15 +205,19 @@ function accept() {
 }
 
 /* =========================
-   CONTINUE FLOW
+   CONTINUE
 ========================= */
 function showContinuation() {
-  const options = scripts[mode]?.responses[step - 1] || [];
+
+  const script = scripts[mode];
+  if (!script) return showHome();
+
+  const options = script.responses[step - 1] || [];
 
   window.currentMode = mode;
   window.currentOptions = options;
 
-  let html = `<h1>${decodeURIComponent(msg)}</h1>`;
+  let html = `<h1>${safeDecode(msg)}</h1>`;
 
   options.forEach((opt, i) => {
     html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
@@ -226,16 +227,23 @@ function showContinuation() {
 }
 
 /* =========================
-   ROUTER (FIXED)
+   ROUTER (SAFE)
 ========================= */
-if (!msg) {
-  showHome();
-}
-else if (!accepted) {
-  showBEntry();
-}
-else {
-  showContinuation();
+try {
+
+  if (!msg) {
+    showHome();
+  }
+  else if (!accepted) {
+    showBEntry();
+  }
+  else {
+    showContinuation();
+  }
+
+} catch (err) {
+  console.error("Render crash:", err);
+  showHome(); // fallback so NEVER blank
 }
 
 </script>
