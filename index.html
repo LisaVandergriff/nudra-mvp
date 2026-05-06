@@ -19,13 +19,9 @@
       padding: 40px 15px;
     }
 
-    h1 {
-      font-size: clamp(28px, 5vw, 42px);
-    }
+    h1 { font-size: clamp(28px, 5vw, 42px); }
 
-    p, .button, .tone {
-      font-family: 'Inter', sans-serif;
-    }
+    p, .button, .tone { font-family: 'Inter', sans-serif; }
 
     .button {
       display: block;
@@ -42,19 +38,11 @@
       text-decoration: none;
     }
 
-    #result {
-      margin-top: 30px;
-    }
+    #result { margin-top: 30px; }
 
-    .hero {
-      font-size: 30px;
-      margin: 20px 0;
-    }
+    .hero { font-size: 30px; margin: 20px 0; }
 
-    .tone {
-      color: #aaa;
-      font-size: 14px;
-    }
+    .tone { color: #aaa; font-size: 14px; }
   </style>
 </head>
 
@@ -63,6 +51,7 @@
 <h1>So… what kind of trouble are we getting into?</h1>
 <p>Pick a mood. I’ll take it from there.</p>
 
+<button class="button" onclick="startMode('dinner')">🍽️ Dinner</button>
 <button class="button" onclick="startMode('date')">🖤 Date Night</button>
 <button class="button" onclick="startMode('fate')">🎲 Fate</button>
 <button class="button" onclick="startMode('reconnect')">💬 Reconnect</button>
@@ -82,41 +71,73 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   MODE SCRIPTS (NO DUPES)
+   SCRIPT ENGINE (FIXED)
+   opener = initiator only
+   responses = receiver progression
 ========================= */
 const scripts = {
-  reconnect: [
-    ["Come sit with me for a minute.", "Tell me what’s been on your mind.", "Let’s reset… just us."],
-    ["You always know how to pull me in.", "Alright… I’m here.", "Talk to me… I’m listening."],
-    ["That’s exactly what I needed.", "Don’t disappear on me now.", "Stay right here with me."]
-  ],
 
-  date: [
-    ["You’ve had my attention all day.", "Tonight doesn’t need a plan.", "Don’t make me overthink this."],
-    ["Careful… I might take you up on that.", "You’re starting something here.", "Alright… what’s next?"],
-    ["No backing out now.", "You win.", "Guess we’re doing this."]
-  ],
+  dinner: {
+    opener: [
+      "Let’s not overthink this—pick a place.",
+      "You pick dinner… I’ll make the rest interesting.",
+      "Easy night… or is it?"
+    ],
+    responses: [
+      ["Pick a place. I’m in.", "You choose… I’ll handle the rest.", "Something easy… then we stay in 😉"],
+      ["Alright… now I’m curious.", "You always do this to me.", "So what happens after dinner?"],
+      ["Guess we’re committed now.", "No backing out.", "Yeah… this was a good call."]
+    ]
+  },
 
-  fate: [
-    ["No thinking—first idea wins.", "Flip a coin and commit.", "You decide. No take-backs."],
-    ["Well… now I’m curious.", "You really went with that?", "Okay… I’m in."],
-    ["Guess fate made the call.", "That escalated quickly.", "No regrets."]
-  ]
+  date: {
+    opener: [
+      "You’ve had my attention all day.",
+      "Tonight doesn’t need a plan.",
+      "Don’t make me overthink this."
+    ],
+    responses: [
+      ["Careful… I might take you up on that.", "You’re starting something here.", "Alright… what’s next?"],
+      ["You always pull me in like this.", "Okay… I’m listening.", "Go on…"],
+      ["No backing out now.", "You win.", "Guess we’re doing this."]
+    ]
+  },
+
+  reconnect: {
+    opener: [
+      "Come sit with me for a minute.",
+      "Tell me what’s been on your mind.",
+      "Let’s reset… just us."
+    ],
+    responses: [
+      ["You always know how to pull me in.", "Alright… I’m here.", "Talk to me…"],
+      ["That’s exactly what I needed.", "Don’t disappear now.", "Stay with me."],
+      ["Yeah… this feels right.", "Let’s not lose this.", "I’m glad you said something."]
+    ]
+  },
+
+  fate: {
+    opener: [
+      "No thinking—first idea wins.",
+      "Flip a coin and commit.",
+      "You decide. No take-backs."
+    ],
+    responses: [
+      ["Well… now I’m curious.", "You really went with that?", "Okay… I’m in."],
+      ["This is either genius or chaos.", "You’re dangerous 😂", "Alright… let’s go"],
+      ["Guess fate made the call.", "No regrets.", "We’re doing this."]
+    ]
+  }
+
 };
 
 /* =========================
-   STEP OPTIONS
-========================= */
-function getOptions(mode, step) {
-  const script = scripts[mode] || [];
-  return script[step - 1] || ["…"];
-}
-
-/* =========================
-   START MODE
+   INITIATOR FLOW
 ========================= */
 function startMode(selectedMode) {
-  const options = getOptions(selectedMode, 1);
+
+  const options = scripts[selectedMode].opener;
+
   window.currentMode = selectedMode;
   window.currentOptions = options;
 
@@ -124,9 +145,10 @@ function startMode(selectedMode) {
 }
 
 /* =========================
-   RENDER BUTTONS
+   RENDER OPTIONS
 ========================= */
 function render(options, title) {
+
   let html = `<div class="tone">${title}</div><br>`;
 
   options.forEach((opt, i) => {
@@ -140,7 +162,9 @@ function render(options, title) {
    SEND MESSAGE (LINK ONLY)
 ========================= */
 function sendChoice(i) {
+
   const text = window.currentOptions[i];
+
   const nextStep = step + 1;
 
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}&accepted=true`;
@@ -157,9 +181,10 @@ function sendChoice(i) {
 /* =========================
    INCOMING FLOW
 ========================= */
+
 if (msg && !accepted) {
 
-  // ONE-TIME ACCEPT SCREEN
+  // ONE TIME ACCEPT
   document.body.innerHTML = `
     <h1>Psst…</h1>
 
@@ -172,8 +197,8 @@ if (msg && !accepted) {
 
 } else if (msg && accepted) {
 
-  // CONTINUATION FLOW
-  const options = getOptions(mode, step);
+  // RECEIVER CONTINUATION
+  const options = scripts[mode].responses[step - 1] || ["…"];
 
   window.currentMode = mode;
   window.currentOptions = options;
