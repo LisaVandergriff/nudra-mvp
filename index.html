@@ -266,8 +266,6 @@ if(msg && !accepted){
   fadeTo(`
     <div class="hero">${decodeURIComponent(msg)}</div>
 
-    <div id="orb" class="orb"></div>
-
     <div id="whisper" class="whisper">…I hope you join me</div>
 
     <div id="buttons" class="buttons">
@@ -276,8 +274,6 @@ if(msg && !accepted){
     </div>
   `);
 
-  setTimeout(()=>{document.getElementById("orb").classList.add("active");},1000);
-  setTimeout(()=>{document.getElementById("orb").classList.add("fade-out");},3800);
   setTimeout(()=>{document.getElementById("whisper").classList.add("show");},4800);
   setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},5600);
 }
