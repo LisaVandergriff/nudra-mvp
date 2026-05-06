@@ -15,12 +15,11 @@
       font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
-      transition: opacity 0.6s ease;
     }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
     .subtle {
@@ -36,7 +35,31 @@
       opacity: 1;
     }
 
+    /* 🔥 A BUTTON STYLE (RESTORED) */
     .button {
+      display: block;
+      width: 90%;
+      max-width: 320px;
+      margin: 12px auto;
+      padding: 16px;
+      border-radius: 999px;
+      border: none;
+      background: #E6D2C0;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.25s ease;
+    }
+
+    .button:hover {
+      background: #f1e2d6;
+      transform: scale(1.02);
+    }
+
+    /* B buttons stay outline */
+    .b-button {
       display: block;
       width: 90%;
       max-width: 320px;
@@ -49,18 +72,9 @@
       font-size: 16px;
       cursor: pointer;
       text-decoration: none;
-      transition: all 0.3s ease;
       font-family: 'Inter', sans-serif;
     }
 
-    .button:hover {
-      background: rgba(230,210,192,0.08);
-      box-shadow: 0 0 18px rgba(230,210,192,0.25);
-    }
-
-    .hidden {
-      display: none;
-    }
   </style>
 </head>
 
@@ -79,15 +93,9 @@ const mode = params.get("mode");
 const accepted = params.get("accepted");
 
 /* =========================
-   SESSION STORAGE
-========================= */
-const sessions = {};
-
-/* =========================
-   SCRIPT ENGINE (A FLOW - LOCKED)
+   SCRIPT ENGINE (A LOCKED)
 ========================= */
 const scripts = {
-
   dinner: {
     opener: [
       "Let’s not overthink this.",
@@ -95,7 +103,6 @@ const scripts = {
       "You pick… I’ll follow your lead."
     ]
   },
-
   date: {
     opener: [
       "You’ve had my attention all day.",
@@ -103,7 +110,6 @@ const scripts = {
       "Don’t make me overthink this."
     ]
   },
-
   reconnect: {
     opener: [
       "Come sit with me for a minute.",
@@ -111,7 +117,6 @@ const scripts = {
       "Let’s reset… just us."
     ]
   },
-
   fate: {
     opener: [
       "No thinking—first idea wins.",
@@ -119,59 +124,47 @@ const scripts = {
       "You decide. No take-backs."
     ]
   }
-
 };
 
 /* =========================
-   B MODE EXPERIENCE MAP
+   B EXPERIENCE
 ========================= */
 const bExperience = {
-
   dinner: {
     line: "Let’s not overthink this.",
     whisper: "… I hope you join me",
     yes: "I’m in",
     no: "Rain check… but I like this"
   },
-
   date: {
     line: "You’ve had my attention all day.",
     whisper: "… I hope you join me",
     yes: "Come closer",
     no: "Not now… but I like this"
   },
-
   reconnect: {
     line: "Let’s reset… just us.",
     whisper: "… I hope you join me",
     yes: "I’m here",
     no: "Give me a little time"
   },
-
   fate: {
     line: "Flip a coin and commit.",
     whisper: "… I hope you join me",
     yes: "Let’s see where this goes",
     no: "Not now… but I’m curious"
   }
-
 };
 
 /* =========================
-   INITIAL LOAD
+   ROUTING
 ========================= */
-if (!session && !mode) {
-  showHome();
-}
-else if (session && !accepted) {
-  showBIntro();
-}
-else if (session && accepted) {
-  showBOptions();
-}
+if (!session && !mode) showHome();
+else if (session && !accepted) showBIntro();
+else if (session && accepted) showBOptions();
 
 /* =========================
-   HOME (A ENTRY)
+   A HOME (FIXED)
 ========================= */
 function showHome() {
   document.getElementById("app").innerHTML = `
@@ -185,17 +178,13 @@ function showHome() {
 }
 
 /* =========================
-   START MODE (A FLOW)
+   A FLOW
 ========================= */
 function startMode(selectedMode) {
 
   const options = scripts[selectedMode].opener;
 
-  let html = `<h1>`;
-
-  html += options[0]; // top headline
-
-  html += `</h1>`;
+  let html = `<h1>${options[0]}</h1>`;
 
   for (let i = 1; i < options.length; i++) {
     html += `<button class="button" onclick="sendChoice('${selectedMode}')">${options[i]}</button>`;
@@ -205,14 +194,11 @@ function startMode(selectedMode) {
 }
 
 /* =========================
-   SEND LINK (NO PHRASE LEAK)
+   SEND LINK
 ========================= */
 function sendChoice(mode) {
 
   const id = Math.random().toString(36).substring(2,10);
-
-  sessions[id] = { mode };
-
   const link = `${window.location.origin}?s=${id}&mode=${mode}`;
 
   document.getElementById("app").innerHTML = `
@@ -227,7 +213,7 @@ function copyLink(link) {
 }
 
 /* =========================
-   B INTRO (EMOTIONAL ARRIVAL)
+   B INTRO
 ========================= */
 function showBIntro() {
 
@@ -238,8 +224,8 @@ function showBIntro() {
 
     <div id="whisper" class="subtle">${exp.whisper}</div>
 
-    <button class="button" onclick="accept()"> ${exp.yes} </button>
-    <button class="button" onclick="decline()"> ${exp.no} </button>
+    <button class="b-button" onclick="accept()">${exp.yes}</button>
+    <button class="b-button" onclick="decline()">${exp.no}</button>
   `;
 
   setTimeout(() => {
@@ -247,21 +233,16 @@ function showBIntro() {
   }, 1200);
 }
 
-/* =========================
-   ACCEPT / DECLINE
-========================= */
 function accept() {
   window.location.href = `${window.location.origin}?s=${session}&mode=${mode}&accepted=true`;
 }
 
 function decline() {
-  document.getElementById("app").innerHTML = `
-    <h1>Another time…</h1>
-  `;
+  document.getElementById("app").innerHTML = `<h1>Another time…</h1>`;
 }
 
 /* =========================
-   B CONTINUATION (PHASE 2)
+   B CONTINUE
 ========================= */
 function showBOptions() {
 
@@ -269,11 +250,10 @@ function showBOptions() {
 
   document.getElementById("app").innerHTML = `
     <h1>${exp.line}</h1>
-
     <div class="subtle show">${exp.whisper}</div>
 
-    <button class="button">Keep going</button>
-    <button class="button">Slow down</button>
+    <button class="b-button">Keep going</button>
+    <button class="b-button">Slow down</button>
   `;
 }
 
