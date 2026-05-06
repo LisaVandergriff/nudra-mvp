@@ -3,10 +3,10 @@
 <head>
   <title>Nudra</title>
 
-  <!-- Mobile scaling -->
+  <!-- Mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Premium Fonts -->
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
   <!-- Vercel Analytics -->
@@ -15,7 +15,7 @@
   <style>
     body {
       background: #000;
-      color: #E6D2C6;
+      color: #E6D2C0;
       font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
@@ -23,9 +23,10 @@
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 10px;
     }
 
-    p, .button, .tone, .subtle {
+    p, .button, .tone {
       font-family: 'Inter', sans-serif;
     }
 
@@ -37,19 +38,16 @@
       padding: 16px;
       border-radius: 999px;
       border: none;
-      background: #E6D2C6;
+      background: #E6D2C0;
       color: #000;
+      font-size: clamp(14px, 4vw, 18px);
       cursor: pointer;
       text-decoration: none;
     }
 
     #result {
       margin-top: 30px;
-    }
-
-    .hero {
-      font-size: clamp(28px, 6vw, 44px);
-      margin-top: 20px;
+      font-size: clamp(20px, 5vw, 30px);
     }
 
     .tone {
@@ -58,9 +56,9 @@
       color: #aaa;
     }
 
-    .section-title {
-      margin-top: 30px;
-      color: #ccc;
+    .hero {
+      font-size: clamp(28px, 6vw, 44px);
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -80,7 +78,7 @@
 <script>
 
 /* =========================
-   TRACKING
+   TRACKING (safe if undefined)
 ========================= */
 function track(event, data = {}) {
   if (window.va) window.va('event', event, data);
@@ -96,56 +94,7 @@ const mode = params.get("mode");
 const thread = params.get("thread") || Date.now();
 
 /* =========================
-   CONTINUE FLOW (RECEIVER)
-========================= */
-if (incoming) {
-
-  console.log("Incoming message:", incoming);
-
-  const responses = getResponses(mode);
-
-  document.body.innerHTML = `
-    <h1>Showing your brave side, I see.</h1>
-
-    <div id="result">
-
-      <div class="hero">${decodeURIComponent(incoming)}</div>
-
-      <div class="tone">Your turn…</div>
-
-      <br>
-
-      ${responses.map((r, i) => `
-        <button class="button" onclick="sendChoice(${i})">${r}</button>
-      `).join("")}
-
-    </div>
-  `;
-
-  window.currentOptions = responses;
-  window.currentMode = mode;
-
-  // ✅ STOP safely (no crash)
-  return;
-}
-
-/* =========================
-   START MODE (MAIN USER)
-========================= */
-function startMode(selectedMode) {
-
-  console.log("Mode selected:", selectedMode);
-
-  const options = getResponses(selectedMode);
-
-  renderOptions("Pick your move...", options);
-
-  window.currentOptions = options;
-  window.currentMode = selectedMode;
-}
-
-/* =========================
-   RESPONSE ENGINE
+   RESPONSE ENGINE (FIXED)
 ========================= */
 function getResponses(mode) {
 
@@ -181,12 +130,52 @@ function getResponses(mode) {
     ];
   }
 
-  // ✅ fallback so nothing breaks
-  return [
-    "Alright… your move.",
-    "Don’t overthink it.",
-    "Go with your instinct."
-  ];
+  return ["Try again."];
+}
+
+/* =========================
+   INCOMING FLOW (FIXED)
+   NO RETURN / NO BREAKING SCRIPT
+========================= */
+if (incoming) {
+
+  track("incoming_open", { mode });
+
+  const responses = getResponses(mode);
+
+  document.body.innerHTML = `
+    <h1>Showing your brave side, I see.</h1>
+
+    <div id="result">
+      <div class="hero">${decodeURIComponent(incoming)}</div>
+      <div class="tone">Your turn…</div>
+      <br>
+
+      ${responses.map((r, i) => `
+        <button class="button" onclick="sendChoice(${i})">${r}</button>
+      `).join("")}
+
+    </div>
+  `;
+
+  window.currentOptions = responses;
+  window.currentMode = mode;
+
+}
+
+/* =========================
+   START MODE (INITIATOR)
+========================= */
+function startMode(selectedMode) {
+
+  track("mode_selected", { mode: selectedMode });
+
+  const options = getResponses(selectedMode);
+
+  window.currentOptions = options;
+  window.currentMode = selectedMode;
+
+  renderOptions("Pick your move...", options);
 }
 
 /* =========================
@@ -194,7 +183,7 @@ function getResponses(mode) {
 ========================= */
 function renderOptions(title, options) {
 
-  let html = `<div class="section-title">${title}</div>`;
+  let html = `<div class="tone">${title}</div><br>`;
 
   options.forEach((opt, index) => {
     html += `<button class="button" onclick="sendChoice(${index})">${opt}</button>`;
@@ -204,7 +193,7 @@ function renderOptions(title, options) {
 }
 
 /* =========================
-   SEND MESSAGE
+   SEND MESSAGE (CORE LOOP)
 ========================= */
 function sendChoice(index) {
 
@@ -214,7 +203,7 @@ function sendChoice(index) {
 
   const fullMessage = `${text} 😏\n\n${link}`;
 
-  console.log("Sending:", fullMessage);
+  track("message_sent", { text, mode: window.currentMode });
 
   document.body.innerHTML = `
     <h1>Send it…</h1>
@@ -236,7 +225,7 @@ function sendChoice(index) {
 }
 
 /* =========================
-   COPY
+   COPY FUNCTION
 ========================= */
 function copyMessage(encoded) {
   const decoded = decodeURIComponent(encoded);
