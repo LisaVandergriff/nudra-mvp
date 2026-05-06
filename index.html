@@ -8,35 +8,41 @@
 
   <style>
     body {
-      background:#000;
-      color:#E6D2C0;
-      font-family:'Cormorant Garamond', serif;
-      text-align:center;
-      padding:40px 15px;
-      margin:0;
+      background: #000;
+      color: #E6D2C0;
+      font-family: 'Cormorant Garamond', serif;
+      text-align: center;
+      padding: 40px 15px;
+      margin: 0;
     }
 
-    #app { transition: opacity .4s ease; }
+    #app { transition: opacity 0.4s ease; }
 
-    .hero { font-size: clamp(26px,4vw,36px); margin-bottom:20px; }
+    .hero { font-size: clamp(26px, 4vw, 36px); margin-bottom: 20px; }
 
     .debug {
-      position:fixed; top:10px; left:10px;
-      font-family:Inter; font-size:12px;
-      color:#aaa; opacity:.6;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-family: Inter, sans-serif;
+      font-size: 12px;
+      color: #aaa;
+      opacity: 0.6;
     }
 
     .orb {
-      width:120px;height:120px;border-radius:50%;
-      margin:40px auto;
-      background:radial-gradient(circle,rgba(230,210,192,.35),rgba(230,210,192,.05));
-      box-shadow:0 0 25px rgba(230,210,192,.4);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 40px auto;
+      background: radial-gradient(circle, rgba(230,210,192,0.35), rgba(230,210,192,0.05));
+      box-shadow: 0 0 25px rgba(230,210,192,0.4);
     }
 
     .whisper {
-      font-family:'Inter';
-      opacity:0;
-      transform:translateY(10px);
+      font-family: 'Inter';
+      opacity: 0;
+      transform: translateY(10px);
     }
 
     .whisper.show {
@@ -44,22 +50,23 @@
     }
 
     @keyframes fadeIn {
-      to { opacity:1; transform:translateY(0); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .buttons { margin-top:30px; opacity:0; transition:.8s; }
+    .buttons { margin-top: 30px; opacity: 0; transition: .8s; }
 
     .button {
-      display:block;
-      width:90%;max-width:320px;
-      margin:12px auto;
-      padding:16px;
-      border-radius:999px;
-      border:1px solid rgba(230,210,192,.25);
-      background:rgba(230,210,192,.06);
-      color:#E6D2C0;
-      font-family:'Inter';
-      cursor:pointer;
+      display: block;
+      width: 90%;
+      max-width: 320px;
+      margin: 12px auto;
+      padding: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(230,210,192,.25);
+      background: rgba(230,210,192,.06);
+      color: #E6D2C0;
+      font-family: 'Inter';
+      cursor: pointer;
     }
   </style>
 </head>
@@ -70,126 +77,118 @@
 <script>
 
 /* =========================
-   DEBUG TAG
+   DEBUG
 ========================= */
 function debugTag(t){ return `<div class="debug">${t}</div>`; }
 
 /* =========================
-   URL STATE (SAFE)
+   URL STATE
 ========================= */
-const p = new URLSearchParams(location.search);
+const params = new URLSearchParams(window.location.search);
 
-const msg = p.get("msg");
-const mode = p.get("mode");
-const step = parseInt(p.get("step")||1);
-const accepted = p.get("accepted");
-const bloop = p.get("bloop");
+const msg = params.get("msg");
+const mode = params.get("mode");
+const step = parseInt(params.get("step") || "1");
+const accepted = params.get("accepted");
+const bloop = params.get("bloop");
 
 /* =========================
-   SCRIPT ENGINE (SAFE)
+   HELPERS
+========================= */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* =========================
+   SCRIPT ENGINE
 ========================= */
 const scripts = {
-  fate:[
-    ["Flip a coin and commit.","You decide.","No thinking—first idea wins."],
-    ["Well… now I’m curious.","You really went with that?","Alright… I’m in."]
+  fate: [
+    ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
+    ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
   ]
 };
 
 /* =========================
    FADE
 ========================= */
-function fade(html){
+function fadeTo(html){
   const app=document.getElementById("app");
   app.style.opacity=0;
   setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
 }
 
 /* =========================
-   COPY (SAFE)
+   A FLOW (UNCHANGED)
 ========================= */
-function copyText(t){
-  navigator.clipboard.writeText(t)
-    .then(()=>alert("Copied"))
-    .catch(()=>alert("Copy failed"));
-}
-
-/* =========================
-   A FLOW (DO NOT TOUCH)
-========================= */
-function home(){
-  fade(`
+function showHome(){
+  fadeTo(`
     ${debugTag("A • HOME")}
     <h1>Welcome back</h1>
-    <div class="orb" onclick="modes()"></div>
+    <div class="orb" onclick="showDirections()"></div>
   `);
 }
 
-function modes(){
-  fade(`
+function showDirections(){
+  fadeTo(`
     ${debugTag("A • STEP 1")}
     <h1>What are we feeling?</h1>
-    <button class="button" onclick="start('fate')">Fate</button>
+    <button class="button" onclick="startMode('fate')">Fate</button>
   `);
 }
 
-function start(m){
-  const options = scripts[m]?.[0] || ["Start"];
-
+function startMode(mode){
+  const options = scripts[mode]?.[0] || ["Start"];
   let html = `${debugTag("A • STEP 2")}`;
 
   options.forEach(o=>{
-    html+=`<button class="button" onclick="send('${o}','${m}',2)">${o}</button>`;
+    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
   });
 
-  fade(html);
+  fadeTo(html);
 }
 
 /* =========================
-   A SEND
+   SEND (UNCHANGED COPY)
 ========================= */
-function send(text,mode,next){
+function sendChoice(text,mode,nextStep){
 
-  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}`;
+  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
   const full=`just open this\n\n${link}`;
 
-  fade(`
+  fadeTo(`
     ${debugTag("A • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="copyText(\`${full}\`)">Copy</button>
+    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
   `);
 }
 
 /* =========================
-   B INVITE (ENTRY POINT)
+   B INVITE (UNCHANGED)
 ========================= */
 if(msg && !accepted && !bloop){
 
-  fade(`
+  fadeTo(`
     ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
 
-    <div id="w" class="whisper">…I hope you join me</div>
+    <div id="whisper" class="whisper">…I hope you join me</div>
 
-    <div id="btn" class="buttons">
+    <div id="buttons" class="buttons">
       <button class="button" onclick="accept()">Yes</button>
-      <button class="button" onclick="home()">Not now</button>
+      <button class="button" onclick="goHome()">Not now</button>
     </div>
   `);
 
-  setTimeout(()=>document.getElementById("w").classList.add("show"),2000);
-  setTimeout(()=>document.getElementById("btn").style.opacity=1,4000);
+  setTimeout(()=>document.getElementById("whisper").classList.add("show"),2000);
+  setTimeout(()=>document.getElementById("buttons").style.opacity=1,4200);
 }
 
 /* =========================
-   B RESPONSE (FIXED + SAFE)
+   ✅ NEW: B RESPONSE (SAFE)
 ========================= */
 else if(bloop){
 
-  // SAFETY: prevent null crash
-  const origin = decodeURIComponent(p.get("origin") || msg || "");
-
-  // SAFETY: prevent script crash
-  const options = (scripts[mode]?.[1]) || ["Still thinking…","Try again","…"];
+  const origin = decodeURIComponent(params.get("origin") || msg || "");
+  const options = scripts[mode]?.[1] || ["Keep going…","Try again","…"];
 
   let html = `
     ${debugTag("B • RESPONSE")}
@@ -197,58 +196,59 @@ else if(bloop){
   `;
 
   options.forEach(o=>{
-    html+=`<button class="button" onclick="bSend('${o}','${mode}',${step+1})">${o}</button>`;
+    html += `<button class="button" onclick="bSend('${o}','${mode}',${step+1})">${o}</button>`;
   });
 
-  fade(html);
+  fadeTo(html);
 }
 
 /* =========================
-   B SEND → RETURNS TO A
+   B SEND
 ========================= */
 function bSend(text,mode,next){
 
   const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}&accepted=true`;
   const full=`${text}\n\n${link}`;
 
-  fade(`
+  fadeTo(`
     ${debugTag("B • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="copyText(\`${full}\`)">Copy</button>
+    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
   `);
 }
 
 /* =========================
-   A CONTINUE AFTER B
+   A CONTINUE
 ========================= */
 else if(msg && accepted){
 
-  const options = (scripts[mode]?.[1]) || ["Continue"];
+  const options = scripts[mode]?.[step-1] || ["…"];
 
-  let html = `
-    ${debugTag("A • STEP "+step)}
-    <div class="hero">${decodeURIComponent(msg)}</div>
-  `;
+  let html = `${debugTag(`A • STEP ${step}`)}<div class="hero">${decodeURIComponent(msg)}</div>`;
 
   options.forEach(o=>{
-    html+=`<button class="button" onclick="send('${o}','${mode}',${step+1})">${o}</button>`;
+    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
 
-  fade(html);
+  fadeTo(html);
 }
 
 /* =========================
    DEFAULT
 ========================= */
 else{
-  home();
+  showHome();
 }
 
 /* =========================
    ACTIONS
 ========================= */
 function accept(){
-  location.href=`?mode=${mode}&step=${step}&bloop=1&origin=${encodeURIComponent(msg)}`;
+  window.location.href=`?mode=${mode}&step=${step}&bloop=1&origin=${encodeURIComponent(msg)}`;
+}
+
+function goHome(){
+  window.location.href="/";
 }
 
 </script>
