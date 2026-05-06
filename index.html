@@ -32,7 +32,7 @@
     }
 
     /* =========================
-       ORB (flutter + fade out)
+       ORB
     ========================= */
     .orb {
       width: 120px;
@@ -44,16 +44,16 @@
         0 0 25px rgba(230,210,192,0.4),
         0 0 70px rgba(230,210,192,0.2);
       opacity: 0;
-      transform: scale(0.95);
+      transform: scale(0.9);
     }
 
     .orb.active {
-      animation: flutter 2.2s ease-in-out forwards;
+      animation: flutter 2.8s ease-in-out forwards;
       opacity: 1;
     }
 
     .orb.fade-out {
-      animation: fadeOrb 1s ease forwards;
+      animation: fadeOrb 1.5s ease forwards;
     }
 
     @keyframes flutter {
@@ -70,7 +70,7 @@
     }
 
     /* =========================
-       WHISPER (bigger entrance)
+       WHISPER
     ========================= */
     .whisper {
       font-family: 'Inter', sans-serif;
@@ -80,7 +80,7 @@
     }
 
     .whisper.show {
-      animation: whisperIn 1s ease forwards;
+      animation: whisperIn 1.2s ease forwards;
     }
 
     @keyframes whisperIn {
@@ -148,7 +148,7 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE (LOCKED A)
+   SCRIPT ENGINE (A LOCKED)
 ========================= */
 const scripts = {
   fate: [
@@ -194,16 +194,19 @@ const bOptions = {
 };
 
 /* =========================
-   FADE
+   FADE TRANSITION
 ========================= */
 function fadeTo(html){
   const app=document.getElementById("app");
   app.style.opacity=0;
-  setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
+  setTimeout(()=>{
+    app.innerHTML=html;
+    app.style.opacity=1;
+  },200);
 }
 
 /* =========================
-   A FLOW (DO NOT TOUCH)
+   A FLOW (LOCKED)
 ========================= */
 function showHome(){
   fadeTo(`
@@ -242,7 +245,7 @@ function sendChoice(text,mode,nextStep){
 }
 
 /* =========================
-   B FLOW (UPGRADED)
+   B FLOW (SLOW BURN)
 ========================= */
 if(msg && !accepted){
 
@@ -263,25 +266,22 @@ if(msg && !accepted){
     </div>
   `);
 
-  // ORB APPEAR + FLUTTER
+  // SLOW BURN TIMING
   setTimeout(()=>{
     document.getElementById("orb").classList.add("active");
-  },500);
+  },1000);
 
-  // ORB DISAPPEAR
   setTimeout(()=>{
     document.getElementById("orb").classList.add("fade-out");
-  },2200);
+  },3800);
 
-  // WHISPER ENTER (bigger)
   setTimeout(()=>{
     document.getElementById("whisper").classList.add("show");
-  },2600);
+  },4800);
 
-  // BUTTONS
   setTimeout(()=>{
     document.getElementById("buttons").style.opacity=1;
-  },3400);
+  },5600);
 }
 else if(msg && accepted){
 
