@@ -280,8 +280,7 @@ if(msg && !accepted){
 else if(msg && accepted){
 
   const options=scripts[mode]?.[step-1]||["…"];
-
-  let html=`<div class="hero">${pick(options)}</div>`;
+  let html=`<div class="hero">${decodeURIComponent(msg)}</div>`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
