@@ -2,66 +2,51 @@
 <html>
 <head>
   <title>Lurre</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
   <style>
     body {
-      background: #000;
-      color: #E6D2C0;
-      font-family: 'Cormorant Garamond', serif;
-      text-align: center;
-      padding: 40px 15px;
-      margin: 0;
+      background:#000;
+      color:#E6D2C0;
+      font-family:'Cormorant Garamond', serif;
+      text-align:center;
+      padding:40px 15px;
+      margin:0;
     }
 
-    #app {
-      transition: opacity 0.4s ease;
-    }
+    #app { transition: opacity 0.4s ease; }
 
-    h1 {
-      font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 40px;
-    }
+    h1 { font-size: clamp(28px,5vw,42px); margin-bottom:40px; }
 
-    .hero {
-      font-size: clamp(26px, 4vw, 36px);
-      margin-bottom: 20px;
-    }
+    .hero { font-size: clamp(26px,4vw,36px); margin-bottom:20px; }
 
-    /* DEBUG TAG */
+    /* DEBUG */
     .debug {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      font-family: Inter, sans-serif;
-      font-size: 12px;
-      color: #aaa;
-      opacity: 0.6;
-      letter-spacing: 1px;
-      z-index: 999;
+      position:fixed;
+      top:10px;
+      left:10px;
+      font-family:Inter,sans-serif;
+      font-size:12px;
+      color:#aaa;
+      opacity:.6;
+      letter-spacing:1px;
+      z-index:999;
     }
 
     .orb {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin: 40px auto;
-      background: radial-gradient(circle, rgba(230,210,192,0.35), rgba(230,210,192,0.05));
-      box-shadow:
-        0 0 25px rgba(230,210,192,0.4),
-        0 0 70px rgba(230,210,192,0.2);
-      opacity: 0;
-      transform: scale(0.9);
+      width:120px;height:120px;border-radius:50%;
+      margin:40px auto;
+      background:radial-gradient(circle,rgba(230,210,192,.35),rgba(230,210,192,.05));
+      box-shadow:0 0 25px rgba(230,210,192,.4),0 0 70px rgba(230,210,192,.2);
     }
 
     .whisper {
-      font-family: 'Inter', sans-serif;
-      margin-top: 10px;
-      opacity: 0;
-      transform: translateY(10px);
+      font-family:'Inter',sans-serif;
+      margin-top:10px;
+      opacity:0;
+      transform:translateY(10px);
     }
 
     .whisper.show {
@@ -69,44 +54,37 @@
     }
 
     @keyframes whisperIn {
-      0% { opacity: 0; transform: translateY(10px); font-size: 14px; }
-      100% { opacity: 1; transform: translateY(0); font-size: 18px; }
+      0% { opacity:0; transform:translateY(10px); font-size:14px; }
+      100% { opacity:1; transform:translateY(0); font-size:18px; }
     }
 
-    .buttons {
-      margin-top: 30px;
-      opacity: 0;
-      transition: opacity 0.8s ease;
-    }
+    .buttons { margin-top:30px; opacity:0; transition:opacity .8s ease; }
 
     .button {
-      display: block;
-      width: 90%;
-      max-width: 320px;
-      margin: 12px auto;
-      padding: 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(230,210,192,0.25);
-      background: rgba(230,210,192,0.06);
-      color: #E6D2C0;
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: all 0.25s ease;
-      text-decoration: none;
+      display:block;
+      width:90%;max-width:320px;
+      margin:12px auto;
+      padding:16px;
+      border-radius:999px;
+      border:1px solid rgba(230,210,192,.25);
+      background:rgba(230,210,192,.06);
+      color:#E6D2C0;
+      font-family:'Inter',sans-serif;
+      font-size:16px;
+      cursor:pointer;
+      backdrop-filter:blur(6px);
+      transition:.25s;
     }
 
     .button:hover {
-      background: rgba(230,210,192,0.14);
-      box-shadow: 0 0 20px rgba(230,210,192,0.25);
-      transform: scale(1.03);
+      background:rgba(230,210,192,.14);
+      box-shadow:0 0 20px rgba(230,210,192,.25);
+      transform:scale(1.03);
     }
   </style>
 </head>
 
 <body>
-
 <div id="app"></div>
 
 <script>
@@ -127,69 +105,47 @@ const msg = params.get("msg");
 const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
+const bloop = params.get("bloop"); // <-- B response mode
 
 /* =========================
-   INVITE TEXT
+   HELPERS
 ========================= */
-function getInviteText() {
-  const invites = [
-    "…come play with me",
-    "I found something for us",
-    "don’t overthink this",
-    "just open this",
-    "this made me think of you"
-  ];
-  return invites[Math.floor(Math.random() * invites.length)];
-}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 /* =========================
-   SCRIPT ENGINE
+   SCRIPT ENGINE (A/B shared)
 ========================= */
 const scripts = {
-  fate: [
-    ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
-    ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
+  fate:[
+    ["Flip a coin and commit.","You decide. No take-backs.","No thinking—first idea wins."],
+    ["Well… now I’m curious.","You really went with that?","Alright… I’m in."]
   ],
-  reconnect: [
-    ["Tell me what’s been on your mind.", "Let’s reset… just us.", "Come sit with me for a minute."],
-    ["I’m here… talk to me.", "That pulled me in.", "Don’t disappear now."]
+  reconnect:[
+    ["Tell me what’s been on your mind.","Let’s reset… just us.","Come sit with me for a minute."],
+    ["I’m here… talk to me.","That pulled me in.","Don’t disappear now."]
   ],
-  date: [
-    ["Tonight doesn’t need a plan.", "Don’t make me overthink this.", "You’ve had my attention all day."],
-    ["Careful… I might take you up on that.", "You’re starting something.", "What’s next?"]
+  date:[
+    ["Tonight doesn’t need a plan.","Don’t make me overthink this.","You’ve had my attention all day."],
+    ["Careful… I might take you up on that.","You’re starting something.","What’s next?"]
   ],
-  dinner: [
-    ["Stay in tonight", "Go out and see what happens", "Surprise me"],
-    ["Now I’m invested.", "You always do this.", "Where is this going?"]
+  dinner:[
+    ["Stay in tonight","Go out and see what happens","Surprise me"],
+    ["Now I’m invested.","You always do this.","Where is this going?"]
   ]
 };
 
 /* =========================
-   B OPTIONS
+   B OPTIONS (YES / SOFT NO)
 ========================= */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
 const bOptions = {
-  fate: {
-    yes: ["Let’s see where this goes","Your move","Alright… surprise me"],
-    no: ["Not now… but I’m curious","This isn’t over","Come back to this"]
-  },
-  reconnect: {
-    yes: ["Stay with me","I’m here","Talk to me"],
-    no: ["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"]
-  },
-  date: {
-    yes: ["Come closer","Keep going…","I’m listening"],
-    no: ["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"]
-  },
-  dinner: {
-    yes: ["Fine… I’m in","Pick for me","Let’s do something easy"],
-    no: ["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"]
-  }
+  fate:{ yes:["Let’s see where this goes","Your move","Alright… surprise me"], no:["Not now… but I’m curious","This isn’t over","Come back to this"] },
+  reconnect:{ yes:["Stay with me","I’m here","Talk to me"], no:["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"] },
+  date:{ yes:["Come closer","Keep going…","I’m listening"], no:["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"] },
+  dinner:{ yes:["Fine… I’m in","Pick for me","Let’s do something easy"], no:["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"] }
 };
 
 /* =========================
-   FADE
+   FADE HELPER
 ========================= */
 function fadeTo(html){
   const app=document.getElementById("app");
@@ -198,14 +154,14 @@ function fadeTo(html){
 }
 
 /* =========================
-   A FLOW
+   A FLOW (LOCKED)
 ========================= */
 function showHome(){
   fadeTo(`
     ${debugTag("A • HOME")}
     <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
-    <div class="orb" style="opacity:1" onclick="showDirections()"></div>
+    <div class="orb" onclick="showDirections()"></div>
   `);
 }
 
@@ -230,31 +186,25 @@ function startMode(mode){
 }
 
 /* =========================
-   SEND
+   A SEND
 ========================= */
 function sendChoice(text,mode,nextStep){
-
   const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
-
-  const inviteText = getInviteText();
-
-  const full=`${inviteText}\n\n${link}`;
+  const full=`just open this\n\n${link}`;
 
   fadeTo(`
     ${debugTag("A • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
+    <button class="button" onclick="navigator.clipboard.writeText('${full}')">Copy</button>
   `);
 }
 
 /* =========================
-   B FLOW
+   B INVITE (FIRST ENTRY)
 ========================= */
-if(msg && !accepted){
+if(msg && !accepted && !bloop){
 
   const pool=bOptions[mode]||bOptions.date;
-  const yes=pick(pool.yes);
-  const no=pick(pool.no);
 
   fadeTo(`
     ${debugTag("B • INVITE")}
@@ -263,29 +213,77 @@ if(msg && !accepted){
     <div id="whisper" class="whisper">…I hope you join me</div>
 
     <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">${yes}</button>
-      <button class="button" onclick="goHome()">${no}</button>
+      <button class="button" onclick="accept()">Let’s see where this goes</button>
+      <button class="button" onclick="goHome()">Not now… but I’m curious</button>
     </div>
   `);
 
   setTimeout(()=>{document.getElementById("whisper").classList.add("show");},2000);
   setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},4200);
 }
+
+/* =========================
+   B RESPONSE (NEW ENGINE STEP)
+========================= */
+else if(bloop){
+
+  const origin = decodeURIComponent(params.get("origin") || "");
+  const options = scripts[mode]?.[step-1] || ["…"];
+
+  let html = `
+    ${debugTag(`B • STEP ${step} RESPONSE`)}
+    <div class="hero">${origin}</div>
+  `;
+
+  options.forEach(o=>{
+    html+=`<button class="button" onclick="bSendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  });
+
+  fadeTo(html);
+}
+
+/* =========================
+   A CONTINUES AFTER B
+========================= */
 else if(msg && accepted){
 
   const options=scripts[mode]?.[step-1]||["…"];
+
   let html=`${debugTag(`A • STEP ${step}`)}<div class="hero">${decodeURIComponent(msg)}</div>`;
+
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
+
   fadeTo(html);
 }
+
+/* =========================
+   DEFAULT
+========================= */
 else{
   showHome();
 }
 
+/* =========================
+   ACTIONS
+========================= */
+
 function accept(){
-  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
+  window.location.href=`?mode=${mode}&step=${step}&bloop=1&origin=${encodeURIComponent(msg)}`;
+}
+
+function bSendChoice(text,mode,nextStep){
+
+  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`;
+
+  const full=`${text}\n\n${link}`;
+
+  fadeTo(`
+    ${debugTag("B • SEND")}
+    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
+    <button class="button" onclick="navigator.clipboard.writeText('${full}')">Copy</button>
+  `);
 }
 
 function goHome(){
@@ -293,6 +291,5 @@ function goHome(){
 }
 
 </script>
-
 </body>
 </html>
