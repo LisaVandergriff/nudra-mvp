@@ -15,6 +15,7 @@
       font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
+      margin: 0;
     }
 
     h1 {
@@ -22,97 +23,97 @@
       margin-bottom: 10px;
     }
 
-    .subtle {
+    .sub {
       font-family: 'Inter', sans-serif;
-      color: #aaa;
       font-size: 14px;
+      color: #aaa;
+      margin-bottom: 30px;
     }
 
+    #app {
+      transition: opacity 0.3s ease;
+    }
+
+    /* ORB */
+    .orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 40px auto;
+      background: radial-gradient(circle, rgba(230,210,192,0.25), rgba(230,210,192,0.05));
+      box-shadow:
+        0 0 20px rgba(230,210,192,0.3),
+        0 0 60px rgba(230,210,192,0.15);
+      animation: pulse 3s infinite ease-in-out;
+      cursor: pointer;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(230,210,192,0.2); }
+      50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(230,210,192,0.4); }
+      100% { transform: scale(1); box-shadow: 0 0 10px rgba(230,210,192,0.2); }
+    }
+
+    /* BUTTONS */
     .button {
       display: block;
       width: 90%;
       max-width: 320px;
-      margin: 10px auto;
+      margin: 12px auto;
       padding: 16px;
       border-radius: 999px;
-      border: none;
-      background: #E6D2C0;
-      color: #000;
+      border: 1px solid rgba(230,210,192,0.3);
+      background: rgba(230,210,192,0.08);
+      color: #E6D2C0;
       font-family: 'Inter', sans-serif;
       font-size: 16px;
       cursor: pointer;
-      text-decoration: none;
+      backdrop-filter: blur(6px);
+      transition: all 0.25s ease;
     }
 
-    .hero {
-      font-size: 30px;
-      margin: 20px 0;
+    .button:hover {
+      background: rgba(230,210,192,0.15);
+      box-shadow:
+        0 0 10px rgba(230,210,192,0.25),
+        0 0 25px rgba(230,210,192,0.15);
+      transform: scale(1.03);
     }
 
     #result {
-      margin-top: 30px;
-    }
-
-    /* ✨ Orb */
-    .orb {
-      width: 120px;
-      height: 120px;
-      margin: 40px auto;
-      border-radius: 50%;
-      border: 1px solid #E6D2C0;
-      position: relative;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .orb:hover {
-      box-shadow: 0 0 25px rgba(230,210,192,0.4);
-    }
-
-    .orb::after {
-      content: "";
-      width: 6px;
-      height: 6px;
-      background: #E6D2C0;
-      border-radius: 50%;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      margin-top: 20px;
     }
   </style>
 </head>
 
 <body>
 
-<div id="app"></div>
+<div id="app">
+
+  <!-- OPENING SCREEN -->
+  <div id="opening">
+    <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
+    <h1>Welcome back.<br>Come play with me.</h1>
+
+    <div class="orb" onclick="showDirections()"></div>
+
+    <div class="sub">Tap to begin</div>
+  </div>
+
+</div>
 
 <script>
 
 /* =========================
-   URL STATE
-========================= */
-const params = new URLSearchParams(window.location.search);
-
-const mode = params.get("mode");
-let step = parseInt(params.get("step") || "1");
-const accepted = params.get("accepted");
-
-/* =========================
-   SCRIPT ENGINE (UNCHANGED)
+   SCRIPT ENGINE
 ========================= */
 const scripts = {
 
   dinner: {
     opener: [
-      "Pick a place. I’m in.",
-      "You choose… I’ll handle the rest.",
-      "Something easy… then we stay in 😉"
-    ],
-    responses: [
-      ["That was too easy…", "You didn’t even hesitate 😏", "I like where this is going"],
-      ["Alright… now you’ve got my attention", "Careful… I might expect more", "So what happens after?"],
-      ["Yeah… we’re not backing out now", "You started this", "This was a good call"]
+      "Let’s not overthink this…",
+      "You pick dinner… I’ll make the rest interesting.",
+      "Easy night… or is it?"
     ]
   },
 
@@ -121,11 +122,6 @@ const scripts = {
       "You’ve had my attention all day.",
       "Tonight doesn’t need a plan.",
       "Don’t make me overthink this."
-    ],
-    responses: [
-      ["Careful… I might take you up on that", "You’re starting something here", "Alright… what’s next?"],
-      ["You always do this to me", "Okay… I’m listening", "Go on…"],
-      ["No backing out now", "You win", "Guess we’re doing this"]
     ]
   },
 
@@ -134,11 +130,6 @@ const scripts = {
       "Come sit with me for a minute.",
       "Tell me what’s been on your mind.",
       "Let’s reset… just us."
-    ],
-    responses: [
-      ["You always know when to do this", "Alright… I’m here", "Talk to me…"],
-      ["That’s exactly what I needed", "Don’t disappear now", "Stay with me"],
-      ["Yeah… this feels right", "Let’s not lose this", "I’m glad you said something"]
     ]
   },
 
@@ -147,129 +138,73 @@ const scripts = {
       "No thinking—first idea wins.",
       "Flip a coin and commit.",
       "You decide. No take-backs."
-    ],
-    responses: [
-      ["Well… now I’m curious", "You really went with that?", "Okay… I’m in"],
-      ["This could go either way", "You’re dangerous 😂", "Alright… let’s go"],
-      ["Guess fate made the call", "No regrets", "We’re doing this"]
     ]
   }
 
 };
 
 /* =========================
-   OPENING SCREEN
+   TRANSITION HELPER
 ========================= */
-function showOpening() {
-  document.getElementById("app").innerHTML = `
-    <div class="subtle">LURRE</div>
-    <h1>Welcome back.<br>Come play with me.</h1>
+function fadeTo(html) {
+  const app = document.getElementById("app");
+  app.style.opacity = 0;
 
-    <div class="orb" onclick="showMain()"></div>
+  setTimeout(() => {
+    app.innerHTML = html;
+    app.style.opacity = 1;
+  }, 200);
+}
+
+/* =========================
+   STEP 1: DIRECTIONS
+========================= */
+function showDirections() {
+
+  fadeTo(`
+    <h1>What are we feeling?</h1>
+    <div class="sub">Just pick a direction.</div>
+
+    <button class="button" onclick="startMode('dinner')">Dinner</button>
+    <button class="button" onclick="startMode('date')">Date Night</button>
+    <button class="button" onclick="startMode('fate')">Fate</button>
+    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
+  `);
+}
+
+/* =========================
+   STEP 2: PROMPTS (NO STACKING)
+========================= */
+function startMode(mode) {
+
+  const options = scripts[mode].opener;
+
+  let html = `
+    <h1>${options[0]}</h1>
+    <div class="sub">Just pick a move.</div>
   `;
-}
-
-/* =========================
-   MAIN DECISION SCREEN
-========================= */
-function showMain() {
-  document.getElementById("app").innerHTML = `
-    <h1>Let’s not overthink this…</h1>
-    <p class="subtle">Just pick a direction.</p>
-
-    <button class="button" onclick="startMode('dinner')">Stay in tonight</button>
-    <button class="button" onclick="startMode('date')">Go out and see what happens</button>
-    <button class="button" onclick="startMode('fate')">Surprise me</button>
-    <button class="button" onclick="startMode('reconnect')">Just us… no distractions</button>
-
-    <div id="result"></div>
-  `;
-}
-
-/* =========================
-   START MODE
-========================= */
-function startMode(selectedMode) {
-
-  window.currentMode = selectedMode;
-  window.currentOptions = scripts[selectedMode].opener;
-
-  render("Pick your move…", window.currentOptions);
-}
-
-/* =========================
-   RENDER
-========================= */
-function render(title, options) {
-
-  let html = `<div class="subtle">${title}</div><br>`;
 
   options.forEach((opt, i) => {
-    html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
+    html += `<button class="button" onclick="sendChoice('${opt}')">${opt}</button>`;
   });
 
-  document.getElementById("result").innerHTML = html;
+  fadeTo(html);
 }
 
 /* =========================
-   SEND
+   STEP 3: SEND
 ========================= */
-function sendChoice(i) {
+function sendChoice(text) {
 
-  const nextStep = step + 1;
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
-  const link = `https://nudra-mvp.vercel.app/?mode=${window.currentMode}&step=${nextStep}&accepted=true`;
-
-  document.getElementById("app").innerHTML = `
-    <h1>Send it…</h1>
+  fadeTo(`
+    <h1>${text}</h1>
+    <div class="sub">Send it…</div>
 
     <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
     <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email it</a>
-  `;
-}
-
-/* =========================
-   INCOMING FLOW (UNCHANGED)
-========================= */
-if (mode && !accepted) {
-
-  document.getElementById("app").innerHTML = `
-    <h1>Psst…</h1>
-
-    <div class="hero">Someone’s thinking about you.</div>
-    <div class="subtle">Do you want to play?</div>
-
-    <a href="?mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
-    <a href="/" class="button">Not now</a>
-  `;
-
-} else if (mode && accepted) {
-
-  const script = scripts[mode];
-
-  if (step > script.responses.length) {
-    step = script.responses.length;
-  }
-
-  const options = script.responses[step - 1];
-
-  window.currentMode = mode;
-  window.currentOptions = options;
-
-  document.getElementById("app").innerHTML = `
-    <h1>Showing your brave side, I see.</h1>
-
-    <div class="subtle">Your turn…</div>
-
-    <div id="result"></div>
-  `;
-
-  render("", options);
-
-} else {
-
-  // 👇 ONLY SHOW OPENING IF NO FLOW
-  showOpening();
+  `);
 }
 
 </script>
