@@ -31,9 +31,6 @@
       margin-bottom: 20px;
     }
 
-    /* =========================
-       ORB
-    ========================= */
     .orb {
       width: 120px;
       height: 120px;
@@ -69,9 +66,6 @@
       100% { opacity: 0; transform: scale(0.85); }
     }
 
-    /* =========================
-       WHISPER
-    ========================= */
     .whisper {
       font-family: 'Inter', sans-serif;
       margin-top: 10px;
@@ -96,9 +90,6 @@
       }
     }
 
-    /* =========================
-       BUTTONS
-    ========================= */
     .buttons {
       margin-top: 30px;
       opacity: 0;
@@ -148,7 +139,21 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE (A LOCKED)
+   INVITE TEXT (NEW FIX)
+========================= */
+function getInviteText() {
+  const invites = [
+    "…come play with me",
+    "I found something for us",
+    "don’t overthink this",
+    "just open this",
+    "this made me think of you"
+  ];
+  return invites[Math.floor(Math.random() * invites.length)];
+}
+
+/* =========================
+   SCRIPT ENGINE (LOCKED)
 ========================= */
 const scripts = {
   fate: [
@@ -194,19 +199,16 @@ const bOptions = {
 };
 
 /* =========================
-   FADE TRANSITION
+   FADE
 ========================= */
 function fadeTo(html){
   const app=document.getElementById("app");
   app.style.opacity=0;
-  setTimeout(()=>{
-    app.innerHTML=html;
-    app.style.opacity=1;
-  },200);
+  setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
 }
 
 /* =========================
-   A FLOW (LOCKED)
+   A FLOW (UNCHANGED)
 ========================= */
 function showHome(){
   fadeTo(`
@@ -235,9 +237,17 @@ function startMode(mode){
   fadeTo(html);
 }
 
+/* =========================
+   SEND (FIXED — NO PHRASE)
+========================= */
 function sendChoice(text,mode,nextStep){
+
   const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
-  const full=`${text}\n\n${link}`;
+
+  const inviteText = getInviteText();
+
+  const full=`${inviteText}\n\n${link}`;
+
   fadeTo(`
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
     <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
@@ -245,7 +255,7 @@ function sendChoice(text,mode,nextStep){
 }
 
 /* =========================
-   B FLOW (SLOW BURN)
+   B FLOW (UNCHANGED FOR NOW)
 ========================= */
 if(msg && !accepted){
 
@@ -266,22 +276,10 @@ if(msg && !accepted){
     </div>
   `);
 
-  // SLOW BURN TIMING
-  setTimeout(()=>{
-    document.getElementById("orb").classList.add("active");
-  },1000);
-
-  setTimeout(()=>{
-    document.getElementById("orb").classList.add("fade-out");
-  },3800);
-
-  setTimeout(()=>{
-    document.getElementById("whisper").classList.add("show");
-  },4800);
-
-  setTimeout(()=>{
-    document.getElementById("buttons").style.opacity=1;
-  },5600);
+  setTimeout(()=>{document.getElementById("orb").classList.add("active");},1000);
+  setTimeout(()=>{document.getElementById("orb").classList.add("fade-out");},3800);
+  setTimeout(()=>{document.getElementById("whisper").classList.add("show");},4800);
+  setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},5600);
 }
 else if(msg && accepted){
 
@@ -299,6 +297,7 @@ else{
 function accept(){
   window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
 }
+
 function goHome(){
   window.location.href="/";
 }
