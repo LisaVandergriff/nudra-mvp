@@ -42,9 +42,9 @@
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); box-shadow: 0 0 10px rgba(230,210,192,0.2); }
-      50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(230,210,192,0.4); }
-      100% { transform: scale(1); box-shadow: 0 0 10px rgba(230,210,192,0.2); }
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     /* BUTTONS */
@@ -52,7 +52,7 @@
       display: block;
       width: 90%;
       max-width: 320px;
-      margin: 12px auto;
+      margin: 14px auto;
       padding: 16px;
       border-radius: 999px;
       border: 1px solid rgba(230,210,192,0.25);
@@ -66,10 +66,8 @@
     }
 
     .button:hover {
-      background: rgba(230,210,192,0.12);
-      box-shadow:
-        0 0 10px rgba(230,210,192,0.25),
-        0 0 25px rgba(230,210,192,0.12);
+      background: rgba(230,210,192,0.14);
+      box-shadow: 0 0 20px rgba(230,210,192,0.25);
       transform: scale(1.03);
     }
 
@@ -80,8 +78,8 @@
 
 <div id="app">
 
-  <!-- OPENING SCREEN -->
-  <div id="opening">
+  <!-- OPENING -->
+  <div>
     <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
 
@@ -93,47 +91,38 @@
 <script>
 
 /* =========================
-   SCRIPT ENGINE (FIXED)
+   SCRIPTS (CHOICES ONLY)
 ========================= */
 const scripts = {
 
-  fate: {
-    hero: "No thinking—first idea wins.",
-    choices: [
-      "Flip a coin and commit.",
-      "You decide. No take-backs."
-    ]
-  },
+  fate: [
+    "Flip a coin and commit.",
+    "You decide. No take-backs.",
+    "No thinking—first idea wins."
+  ],
 
-  reconnect: {
-    hero: "Come sit with me for a minute.",
-    choices: [
-      "Tell me what’s been on your mind.",
-      "Let’s reset… just us."
-    ]
-  },
+  reconnect: [
+    "Tell me what’s been on your mind.",
+    "Let’s reset… just us.",
+    "Come sit with me for a minute."
+  ],
 
-  date: {
-    hero: "You’ve had my attention all day.",
-    choices: [
-      "Tonight doesn’t need a plan.",
-      "Don’t make me overthink this."
-    ]
-  },
+  date: [
+    "Tonight doesn’t need a plan.",
+    "Don’t make me overthink this.",
+    "You’ve had my attention all day."
+  ],
 
-  dinner: {
-    hero: "Let’s not overthink this…",
-    choices: [
-      "Stay in tonight",
-      "Go out and see what happens",
-      "Surprise me"
-    ]
-  }
+  dinner: [
+    "Stay in tonight",
+    "Go out and see what happens",
+    "Surprise me"
+  ]
 
 };
 
 /* =========================
-   FADE TRANSITION
+   FADE
 ========================= */
 function fadeTo(html) {
   const app = document.getElementById("app");
@@ -146,7 +135,7 @@ function fadeTo(html) {
 }
 
 /* =========================
-   SCREEN: DIRECTIONS
+   DIRECTIONS
 ========================= */
 function showDirections() {
 
@@ -161,16 +150,15 @@ function showDirections() {
 }
 
 /* =========================
-   SCREEN: MODE
+   MODE → ONLY BUTTONS
 ========================= */
 function startMode(mode) {
 
-  const hero = scripts[mode].hero;
-  const choices = scripts[mode].choices;
+  const options = scripts[mode];
 
-  let html = `<h1>${hero}</h1>`;
+  let html = ``;
 
-  choices.forEach(opt => {
+  options.forEach(opt => {
     html += `<button class="button" onclick="sendChoice('${opt}')">${opt}</button>`;
   });
 
@@ -178,7 +166,7 @@ function startMode(mode) {
 }
 
 /* =========================
-   SCREEN: SEND
+   SEND
 ========================= */
 function sendChoice(text) {
 
