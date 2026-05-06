@@ -1,62 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Nudra</title>
+  <title>Lurre</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
-  <script defer src="/_vercel/insights/script.js"></script>
-
   <style>
     body {
       background: #000;
       color: #E6D2C0;
+      margin: 0;
       font-family: 'Cormorant Garamond', serif;
-      text-align: center;
-      padding: 40px 15px;
     }
 
-    h1 { font-size: clamp(28px, 5vw, 42px); }
+    .center {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
-    p, .button, .tone { font-family: 'Inter', sans-serif; }
+    .brand {
+      letter-spacing: 8px;
+      font-size: 18px;
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+
+    .hero {
+      font-size: clamp(26px, 5vw, 36px);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .tone {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 10px;
+    }
 
     .button {
+      font-family: 'Inter', sans-serif;
       display: block;
       width: 90%;
       max-width: 320px;
       margin: 10px auto;
-      padding: 16px;
+      padding: 14px;
       border-radius: 999px;
       border: none;
       background: #E6D2C0;
       color: #000;
-      font-size: 16px;
-      cursor: pointer;
+      text-align: center;
       text-decoration: none;
     }
 
-    #result { margin-top: 30px; }
+    .orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 1px solid rgba(230,210,192,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(230,210,192,0.2);
+      cursor: pointer;
+    }
 
-    .hero { font-size: 30px; margin: 20px 0; }
-
-    .tone { color: #aaa; font-size: 14px; }
+    #app {
+      padding: 30px;
+      text-align: center;
+    }
   </style>
 </head>
 
 <body>
 
-<h1>So… what kind of trouble are we getting into?</h1>
-<p>Pick a mood. I’ll take it from there.</p>
-
-<button class="button" onclick="startMode('dinner')">🍽️ Dinner</button>
-<button class="button" onclick="startMode('date')">🖤 Date Night</button>
-<button class="button" onclick="startMode('fate')">🎲 Fate</button>
-<button class="button" onclick="startMode('reconnect')">💬 Reconnect</button>
-
-<div id="result">Go on… pick something.</div>
+<div id="app"></div>
 
 <script>
 
@@ -71,22 +95,20 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE (FIXED)
-   opener = initiator only
-   responses = receiver progression
+   SCRIPT ENGINE (FINAL)
 ========================= */
 const scripts = {
 
-  dinner: {
+  reconnect: {
     opener: [
-      "Let’s not overthink this—pick a place.",
-      "You pick dinner… I’ll make the rest interesting.",
-      "Easy night… or is it?"
+      "Come sit with me for a minute.",
+      "Tell me what’s been on your mind.",
+      "Let’s reset… just us."
     ],
     responses: [
-      ["Pick a place. I’m in.", "You choose… I’ll handle the rest.", "Something easy… then we stay in 😉"],
-      ["Alright… now I’m curious.", "You always do this to me.", "So what happens after dinner?"],
-      ["Guess we’re committed now.", "No backing out.", "Yeah… this was a good call."]
+      ["You always know how to pull me in.", "Alright… I’m here.", "Talk to me…"],
+      ["That’s exactly what I needed.", "Don’t disappear now.", "Stay with me."],
+      ["Yeah… this feels right.", "Let’s not lose this.", "I’m glad you said something."]
     ]
   },
 
@@ -103,16 +125,16 @@ const scripts = {
     ]
   },
 
-  reconnect: {
+  dinner: {
     opener: [
-      "Come sit with me for a minute.",
-      "Tell me what’s been on your mind.",
-      "Let’s reset… just us."
+      "Let’s not overthink this—pick a place.",
+      "You pick dinner… I’ll make the rest interesting.",
+      "Easy night… or is it?"
     ],
     responses: [
-      ["You always know how to pull me in.", "Alright… I’m here.", "Talk to me…"],
-      ["That’s exactly what I needed.", "Don’t disappear now.", "Stay with me."],
-      ["Yeah… this feels right.", "Let’s not lose this.", "I’m glad you said something."]
+      ["Pick a place. I’m in.", "You choose… I’ll handle the rest.", "Something easy… then we stay in 😉"],
+      ["Alright… now I’m curious.", "You always do this to me.", "So what happens after dinner?"],
+      ["Guess we’re committed now.", "No backing out.", "Yeah… this was a good call."]
     ]
   },
 
@@ -132,7 +154,57 @@ const scripts = {
 };
 
 /* =========================
-   INITIATOR FLOW
+   STEP ENGINE (FIXED)
+========================= */
+function getStepOptions(mode, step) {
+
+  const sets = scripts[mode].responses;
+
+  const index = Math.floor((step - 2) / 2);
+
+  if (index < sets.length) return sets[index];
+
+  return sets[sets.length - 1];
+}
+
+/* =========================
+   LANDING SCREEN
+========================= */
+function renderLanding() {
+  document.getElementById("app").innerHTML = `
+    <div class="center">
+
+      <div class="brand">LURRE</div>
+
+      <div class="hero">
+        Welcome back.<br>
+        Come play with me.
+      </div>
+
+      <div class="orb" onclick="enterApp()">⟡</div>
+
+    </div>
+  `;
+}
+
+/* =========================
+   MODE SELECT
+========================= */
+function enterApp() {
+  document.getElementById("app").innerHTML = `
+    <div class="hero">What are we feeling?</div>
+
+    <button class="button" onclick="startMode('dinner')">Dinner</button>
+    <button class="button" onclick="startMode('date')">Date Night</button>
+    <button class="button" onclick="startMode('fate')">Fate</button>
+    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
+
+    <div id="result"></div>
+  `;
+}
+
+/* =========================
+   INITIATOR FLOW (A)
 ========================= */
 function startMode(selectedMode) {
 
@@ -141,13 +213,13 @@ function startMode(selectedMode) {
   window.currentMode = selectedMode;
   window.currentOptions = options;
 
-  render(options, "Pick your move…");
+  renderOptions(options, "Pick your move…");
 }
 
 /* =========================
    RENDER OPTIONS
 ========================= */
-function render(options, title) {
+function renderOptions(options, title) {
 
   let html = `<div class="tone">${title}</div><br>`;
 
@@ -159,61 +231,56 @@ function render(options, title) {
 }
 
 /* =========================
-   SEND MESSAGE (LINK ONLY)
+   SEND MESSAGE
 ========================= */
 function sendChoice(i) {
 
   const text = window.currentOptions[i];
-
   const nextStep = step + 1;
 
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}&accepted=true`;
+  const link = `${location.origin}?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}&accepted=true`;
 
-  document.body.innerHTML = `
-    <h1>Send it…</h1>
+  document.getElementById("app").innerHTML = `
     <div class="hero">${text}</div>
 
     <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
-    <a href="mailto:?subject=Nudra&body=${encodeURIComponent(link)}" class="button">Email it</a>
+    <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email it</a>
   `;
 }
 
 /* =========================
-   INCOMING FLOW
+   INCOMING FLOW (B)
 ========================= */
 
 if (msg && !accepted) {
 
-  // ONE TIME ACCEPT
-  document.body.innerHTML = `
-    <h1>Psst…</h1>
-
+  document.getElementById("app").innerHTML = `
     <div class="hero">${decodeURIComponent(msg)}</div>
     <div class="tone">Do you want to play?</div>
 
-    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
+    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=2&accepted=true" class="button">Yes</a>
     <a href="/" class="button">Not now</a>
   `;
 
-} else if (msg && accepted) {
+}
+else if (msg && accepted) {
 
-  // RECEIVER CONTINUATION
-  const options = scripts[mode].responses[step - 1] || ["…"];
+  const options = getStepOptions(mode, step);
 
   window.currentMode = mode;
   window.currentOptions = options;
 
-  document.body.innerHTML = `
-    <h1>Showing your brave side, I see.</h1>
-
+  document.getElementById("app").innerHTML = `
     <div class="hero">${decodeURIComponent(msg)}</div>
     <div class="tone">Your turn…</div>
 
     <div id="result"></div>
   `;
 
-  render(options, "");
-
+  renderOptions(options, "");
+}
+else {
+  renderLanding();
 }
 
 </script>
