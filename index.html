@@ -5,6 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
   <style>
@@ -14,86 +15,25 @@
       font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
-      margin: 0;
-    }
-
-    #app {
-      transition: opacity 0.4s ease;
+      transition: opacity 0.6s ease;
     }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 40px;
-    }
-
-    .hero {
-      font-size: clamp(26px, 4vw, 36px);
       margin-bottom: 20px;
     }
 
-    .orb {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin: 40px auto;
-      background: radial-gradient(circle, rgba(230,210,192,0.35), rgba(230,210,192,0.05));
-      box-shadow:
-        0 0 25px rgba(230,210,192,0.4),
-        0 0 70px rgba(230,210,192,0.2);
-      opacity: 0;
-      transform: scale(0.9);
-    }
-
-    .orb.active {
-      animation: flutter 2.8s ease-in-out forwards;
-      opacity: 1;
-    }
-
-    .orb.fade-out {
-      animation: fadeOrb 1.5s ease forwards;
-    }
-
-    @keyframes flutter {
-      0%   { transform: scale(0.9); opacity: 0; }
-      30%  { transform: scale(1.08); }
-      55%  { transform: scale(0.98); }
-      75%  { transform: scale(1.05); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes fadeOrb {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.85); }
-    }
-
-    .whisper {
+    .subtle {
       font-family: 'Inter', sans-serif;
-      margin-top: 10px;
+      font-size: 16px;
+      color: #aaa;
+      margin: 20px 0;
       opacity: 0;
-      transform: translateY(10px);
+      transition: opacity 1.5s ease;
     }
 
-    .whisper.show {
-      animation: whisperIn 1.2s ease forwards;
-    }
-
-    @keyframes whisperIn {
-      0% {
-        opacity: 0;
-        transform: translateY(10px);
-        font-size: 14px;
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-        font-size: 18px;
-      }
-    }
-
-    .buttons {
-      margin-top: 30px;
-      opacity: 0;
-      transition: opacity 0.8s ease;
+    .subtle.show {
+      opacity: 1;
     }
 
     .button {
@@ -103,21 +43,23 @@
       margin: 12px auto;
       padding: 16px;
       border-radius: 999px;
-      border: 1px solid rgba(230,210,192,0.25);
-      background: rgba(230,210,192,0.06);
+      border: 1px solid rgba(230,210,192,0.3);
+      background: transparent;
       color: #E6D2C0;
-      font-family: 'Inter', sans-serif;
       font-size: 16px;
       cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: all 0.25s ease;
       text-decoration: none;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
     }
 
     .button:hover {
-      background: rgba(230,210,192,0.14);
-      box-shadow: 0 0 20px rgba(230,210,192,0.25);
-      transform: scale(1.03);
+      background: rgba(230,210,192,0.08);
+      box-shadow: 0 0 18px rgba(230,210,192,0.25);
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
@@ -132,174 +74,207 @@
    URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
-
-const msg = params.get("msg");
+const session = params.get("s");
 const mode = params.get("mode");
-const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   INVITE TEXT (NEW FIX)
+   SESSION STORAGE
 ========================= */
-function getInviteText() {
-  const invites = [
-    "…come play with me",
-    "I found something for us",
-    "don’t overthink this",
-    "just open this",
-    "this made me think of you"
-  ];
-  return invites[Math.floor(Math.random() * invites.length)];
-}
+const sessions = {};
 
 /* =========================
-   SCRIPT ENGINE (LOCKED)
+   SCRIPT ENGINE (A FLOW - LOCKED)
 ========================= */
 const scripts = {
-  fate: [
-    ["Flip a coin and commit.", "You decide. No take-backs.", "No thinking—first idea wins."],
-    ["Well… now I’m curious.", "You really went with that?", "Alright… I’m in."]
-  ],
-  reconnect: [
-    ["Tell me what’s been on your mind.", "Let’s reset… just us.", "Come sit with me for a minute."],
-    ["I’m here… talk to me.", "That pulled me in.", "Don’t disappear now."]
-  ],
-  date: [
-    ["Tonight doesn’t need a plan.", "Don’t make me overthink this.", "You’ve had my attention all day."],
-    ["Careful… I might take you up on that.", "You’re starting something.", "What’s next?"]
-  ],
-  dinner: [
-    ["Stay in tonight", "Go out and see what happens", "Surprise me"],
-    ["Now I’m invested.", "You always do this.", "Where is this going?"]
-  ]
-};
 
-/* =========================
-   B OPTIONS
-========================= */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-const bOptions = {
-  fate: {
-    yes: ["Let’s see where this goes","Your move","Alright… surprise me"],
-    no: ["Not now… but I’m curious","This isn’t over","Come back to this"]
-  },
-  reconnect: {
-    yes: ["Stay with me","I’m here","Talk to me"],
-    no: ["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"]
-  },
-  date: {
-    yes: ["Come closer","Keep going…","I’m listening"],
-    no: ["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"]
-  },
   dinner: {
-    yes: ["Fine… I’m in","Pick for me","Let’s do something easy"],
-    no: ["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"]
+    opener: [
+      "Let’s not overthink this.",
+      "Easy night… or is it?",
+      "You pick… I’ll follow your lead."
+    ]
+  },
+
+  date: {
+    opener: [
+      "You’ve had my attention all day.",
+      "Tonight doesn’t need a plan.",
+      "Don’t make me overthink this."
+    ]
+  },
+
+  reconnect: {
+    opener: [
+      "Come sit with me for a minute.",
+      "Tell me what’s been on your mind.",
+      "Let’s reset… just us."
+    ]
+  },
+
+  fate: {
+    opener: [
+      "No thinking—first idea wins.",
+      "Flip a coin and commit.",
+      "You decide. No take-backs."
+    ]
   }
+
 };
 
 /* =========================
-   FADE
+   B MODE EXPERIENCE MAP
 ========================= */
-function fadeTo(html){
-  const app=document.getElementById("app");
-  app.style.opacity=0;
-  setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
+const bExperience = {
+
+  dinner: {
+    line: "Let’s not overthink this.",
+    whisper: "… I hope you join me",
+    yes: "I’m in",
+    no: "Rain check… but I like this"
+  },
+
+  date: {
+    line: "You’ve had my attention all day.",
+    whisper: "… I hope you join me",
+    yes: "Come closer",
+    no: "Not now… but I like this"
+  },
+
+  reconnect: {
+    line: "Let’s reset… just us.",
+    whisper: "… I hope you join me",
+    yes: "I’m here",
+    no: "Give me a little time"
+  },
+
+  fate: {
+    line: "Flip a coin and commit.",
+    whisper: "… I hope you join me",
+    yes: "Let’s see where this goes",
+    no: "Not now… but I’m curious"
+  }
+
+};
+
+/* =========================
+   INITIAL LOAD
+========================= */
+if (!session && !mode) {
+  showHome();
+}
+else if (session && !accepted) {
+  showBIntro();
+}
+else if (session && accepted) {
+  showBOptions();
 }
 
 /* =========================
-   A FLOW (UNCHANGED)
+   HOME (A ENTRY)
 ========================= */
-function showHome(){
-  fadeTo(`
-    <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
-    <h1>Welcome back.<br>Come play with me.</h1>
-    <div class="orb" style="opacity:1" onclick="showDirections()"></div>
-  `);
-}
-
-function showDirections(){
-  fadeTo(`
+function showHome() {
+  document.getElementById("app").innerHTML = `
     <h1>What are we feeling?</h1>
+
     <button class="button" onclick="startMode('dinner')">Dinner</button>
     <button class="button" onclick="startMode('date')">Date Night</button>
     <button class="button" onclick="startMode('fate')">Fate</button>
     <button class="button" onclick="startMode('reconnect')">Reconnect</button>
-  `);
-}
-
-function startMode(mode){
-  const options=scripts[mode][0];
-  let html=``;
-  options.forEach(o=>{
-    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
-  });
-  fadeTo(html);
+  `;
 }
 
 /* =========================
-   SEND (FIXED — NO PHRASE)
+   START MODE (A FLOW)
 ========================= */
-function sendChoice(text,mode,nextStep){
+function startMode(selectedMode) {
 
-  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+  const options = scripts[selectedMode].opener;
 
-  const inviteText = getInviteText();
+  let html = `<h1>`;
 
-  const full=`${inviteText}\n\n${link}`;
+  html += options[0]; // top headline
 
-  fadeTo(`
-    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
-  `);
+  html += `</h1>`;
+
+  for (let i = 1; i < options.length; i++) {
+    html += `<button class="button" onclick="sendChoice('${selectedMode}')">${options[i]}</button>`;
+  }
+
+  document.getElementById("app").innerHTML = html;
 }
 
 /* =========================
-   B FLOW (UNCHANGED FOR NOW)
+   SEND LINK (NO PHRASE LEAK)
 ========================= */
-if(msg && !accepted){
+function sendChoice(mode) {
 
-  const pool=bOptions[mode]||bOptions.date;
-  const yes=pick(pool.yes);
-  const no=pick(pool.no);
+  const id = Math.random().toString(36).substring(2,10);
 
-  fadeTo(`
-    <div class="hero">${decodeURIComponent(msg)}</div>
+  sessions[id] = { mode };
 
-    <div id="orb" class="orb"></div>
+  const link = `${window.location.origin}?s=${id}&mode=${mode}`;
 
-    <div id="whisper" class="whisper">…I hope you join me</div>
-
-    <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">${yes}</button>
-      <button class="button" onclick="goHome()">${no}</button>
-    </div>
-  `);
-
-  setTimeout(()=>{document.getElementById("orb").classList.add("active");},1000);
-  setTimeout(()=>{document.getElementById("orb").classList.add("fade-out");},3800);
-  setTimeout(()=>{document.getElementById("whisper").classList.add("show");},4800);
-  setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},5600);
-}
-else if(msg && accepted){
-
-  const options=scripts[mode]?.[step-1]||["…"];
-  let html=`<div class="hero">${decodeURIComponent(msg)}</div>`;
-  options.forEach(o=>{
-    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
-  });
-  fadeTo(html);
-}
-else{
-  showHome();
+  document.getElementById("app").innerHTML = `
+    <button class="button" onclick="window.location.href='sms:?body=${link}'">Send</button>
+    <button class="button" onclick="copyLink('${link}')">Copy</button>
+  `;
 }
 
-function accept(){
-  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
+function copyLink(link) {
+  navigator.clipboard.writeText(link);
+  alert("Copied");
 }
 
-function goHome(){
-  window.location.href="/";
+/* =========================
+   B INTRO (EMOTIONAL ARRIVAL)
+========================= */
+function showBIntro() {
+
+  const exp = bExperience[mode];
+
+  document.getElementById("app").innerHTML = `
+    <h1>${exp.line}</h1>
+
+    <div id="whisper" class="subtle">${exp.whisper}</div>
+
+    <button class="button" onclick="accept()"> ${exp.yes} </button>
+    <button class="button" onclick="decline()"> ${exp.no} </button>
+  `;
+
+  setTimeout(() => {
+    document.getElementById("whisper").classList.add("show");
+  }, 1200);
+}
+
+/* =========================
+   ACCEPT / DECLINE
+========================= */
+function accept() {
+  window.location.href = `${window.location.origin}?s=${session}&mode=${mode}&accepted=true`;
+}
+
+function decline() {
+  document.getElementById("app").innerHTML = `
+    <h1>Another time…</h1>
+  `;
+}
+
+/* =========================
+   B CONTINUATION (PHASE 2)
+========================= */
+function showBOptions() {
+
+  const exp = bExperience[mode];
+
+  document.getElementById("app").innerHTML = `
+    <h1>${exp.line}</h1>
+
+    <div class="subtle show">${exp.whisper}</div>
+
+    <button class="button">Keep going</button>
+    <button class="button">Slow down</button>
+  `;
 }
 
 </script>
