@@ -31,19 +31,6 @@
       margin-bottom: 20px;
     }
 
-    /* DEBUG TAG */
-    .debug {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      font-family: Inter, sans-serif;
-      font-size: 12px;
-      color: #aaa;
-      opacity: 0.6;
-      letter-spacing: 1px;
-      z-index: 999;
-    }
-
     .orb {
       width: 120px;
       height: 120px;
@@ -55,6 +42,28 @@
         0 0 70px rgba(230,210,192,0.2);
       opacity: 0;
       transform: scale(0.9);
+    }
+
+    .orb.active {
+      animation: flutter 2.8s ease-in-out forwards;
+      opacity: 1;
+    }
+
+    .orb.fade-out {
+      animation: fadeOrb 1.5s ease forwards;
+    }
+
+    @keyframes flutter {
+      0%   { transform: scale(0.9); opacity: 0; }
+      30%  { transform: scale(1.08); }
+      55%  { transform: scale(0.98); }
+      75%  { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeOrb {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.85); }
     }
 
     .whisper {
@@ -69,8 +78,16 @@
     }
 
     @keyframes whisperIn {
-      0% { opacity: 0; transform: translateY(10px); font-size: 14px; }
-      100% { opacity: 1; transform: translateY(0); font-size: 18px; }
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+        font-size: 14px;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        font-size: 18px;
+      }
     }
 
     .buttons {
@@ -112,13 +129,6 @@
 <script>
 
 /* =========================
-   DEBUG HELPER
-========================= */
-function debugTag(label){
-  return `<div class="debug">${label}</div>`;
-}
-
-/* =========================
    URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
@@ -129,7 +139,7 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   INVITE TEXT
+   INVITE TEXT (NEW FIX)
 ========================= */
 function getInviteText() {
   const invites = [
@@ -143,7 +153,7 @@ function getInviteText() {
 }
 
 /* =========================
-   SCRIPT ENGINE
+   SCRIPT ENGINE (LOCKED)
 ========================= */
 const scripts = {
   fate: [
@@ -198,11 +208,10 @@ function fadeTo(html){
 }
 
 /* =========================
-   A FLOW
+   A FLOW (UNCHANGED)
 ========================= */
 function showHome(){
   fadeTo(`
-    ${debugTag("A • HOME")}
     <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
     <div class="orb" style="opacity:1" onclick="showDirections()"></div>
@@ -211,7 +220,6 @@ function showHome(){
 
 function showDirections(){
   fadeTo(`
-    ${debugTag("A • STEP 1")}
     <h1>What are we feeling?</h1>
     <button class="button" onclick="startMode('dinner')">Dinner</button>
     <button class="button" onclick="startMode('date')">Date Night</button>
@@ -222,7 +230,7 @@ function showDirections(){
 
 function startMode(mode){
   const options=scripts[mode][0];
-  let html=`${debugTag("A • STEP 2")}`;
+  let html=``;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
   });
@@ -230,7 +238,7 @@ function startMode(mode){
 }
 
 /* =========================
-   SEND
+   SEND (FIXED — NO PHRASE)
 ========================= */
 function sendChoice(text,mode,nextStep){
 
@@ -241,14 +249,13 @@ function sendChoice(text,mode,nextStep){
   const full=`${inviteText}\n\n${link}`;
 
   fadeTo(`
-    ${debugTag("A • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
     <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
   `);
 }
 
 /* =========================
-   B FLOW
+   B FLOW (UNCHANGED FOR NOW)
 ========================= */
 if(msg && !accepted){
 
@@ -257,7 +264,6 @@ if(msg && !accepted){
   const no=pick(pool.no);
 
   fadeTo(`
-    ${debugTag(`B • STEP ${step}`)}
     <div class="hero">${decodeURIComponent(msg)}</div>
 
     <div id="whisper" class="whisper">…I hope you join me</div>
@@ -274,7 +280,7 @@ if(msg && !accepted){
 else if(msg && accepted){
 
   const options=scripts[mode]?.[step-1]||["…"];
-  let html=`${debugTag(`A • STEP ${step}`)}<div class="hero">${decodeURIComponent(msg)}</div>`;
+  let html=`<div class="hero">${decodeURIComponent(msg)}</div>`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
