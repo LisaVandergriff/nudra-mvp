@@ -70,12 +70,12 @@
 <script>
 
 /* =========================
-   DEBUG
+   DEBUG TAG
 ========================= */
 function debugTag(t){ return `<div class="debug">${t}</div>`; }
 
 /* =========================
-   URL STATE
+   URL STATE (SAFE)
 ========================= */
 const p = new URLSearchParams(location.search);
 
@@ -86,12 +86,7 @@ const accepted = p.get("accepted");
 const bloop = p.get("bloop");
 
 /* =========================
-   HELPERS
-========================= */
-function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
-
-/* =========================
-   SCRIPT ENGINE
+   SCRIPT ENGINE (SAFE)
 ========================= */
 const scripts = {
   fate:[
@@ -104,13 +99,22 @@ const scripts = {
    FADE
 ========================= */
 function fade(html){
-  const app = document.getElementById("app");
+  const app=document.getElementById("app");
   app.style.opacity=0;
   setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
 }
 
 /* =========================
-   A FLOW (LOCKED)
+   COPY (SAFE)
+========================= */
+function copyText(t){
+  navigator.clipboard.writeText(t)
+    .then(()=>alert("Copied"))
+    .catch(()=>alert("Copy failed"));
+}
+
+/* =========================
+   A FLOW (DO NOT TOUCH)
 ========================= */
 function home(){
   fade(`
@@ -129,20 +133,23 @@ function modes(){
 }
 
 function start(m){
+  const options = scripts[m]?.[0] || ["Start"];
+
   let html = `${debugTag("A • STEP 2")}`;
-  scripts[m][0].forEach(o=>{
+
+  options.forEach(o=>{
     html+=`<button class="button" onclick="send('${o}','${m}',2)">${o}</button>`;
   });
+
   fade(html);
 }
 
 /* =========================
-   A SEND (FIXED COPY)
+   A SEND
 ========================= */
 function send(text,mode,next){
 
   const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}`;
-
   const full=`just open this\n\n${link}`;
 
   fade(`
@@ -153,22 +160,14 @@ function send(text,mode,next){
 }
 
 /* =========================
-   COPY (REAL FIX)
-========================= */
-function copyText(t){
-  navigator.clipboard.writeText(t)
-    .then(()=>alert("Copied"))
-    .catch(()=>alert("Copy failed"));
-}
-
-/* =========================
-   B INVITE
+   B INVITE (ENTRY POINT)
 ========================= */
 if(msg && !accepted && !bloop){
 
   fade(`
     ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
+
     <div id="w" class="whisper">…I hope you join me</div>
 
     <div id="btn" class="buttons">
@@ -177,23 +176,27 @@ if(msg && !accepted && !bloop){
     </div>
   `);
 
-  setTimeout(()=>w.classList.add("show"),2000);
-  setTimeout(()=>btn.style.opacity=1,4000);
+  setTimeout(()=>document.getElementById("w").classList.add("show"),2000);
+  setTimeout(()=>document.getElementById("btn").style.opacity=1,4000);
 }
 
 /* =========================
-   B RESPONSE (NEW)
+   B RESPONSE (FIXED + SAFE)
 ========================= */
 else if(bloop){
 
-  const origin = decodeURIComponent(p.get("origin") || "");
+  // SAFETY: prevent null crash
+  const origin = decodeURIComponent(p.get("origin") || msg || "");
+
+  // SAFETY: prevent script crash
+  const options = (scripts[mode]?.[1]) || ["Still thinking…","Try again","…"];
 
   let html = `
     ${debugTag("B • RESPONSE")}
     <div class="hero">${origin}</div>
   `;
 
-  scripts[mode][1].forEach(o=>{
+  options.forEach(o=>{
     html+=`<button class="button" onclick="bSend('${o}','${mode}',${step+1})">${o}</button>`;
   });
 
@@ -201,12 +204,11 @@ else if(bloop){
 }
 
 /* =========================
-   B SEND → BACK TO A
+   B SEND → RETURNS TO A
 ========================= */
 function bSend(text,mode,next){
 
   const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${next}&accepted=true`;
-
   const full=`${text}\n\n${link}`;
 
   fade(`
@@ -217,16 +219,18 @@ function bSend(text,mode,next){
 }
 
 /* =========================
-   A CONTINUE
+   A CONTINUE AFTER B
 ========================= */
 else if(msg && accepted){
+
+  const options = (scripts[mode]?.[1]) || ["Continue"];
 
   let html = `
     ${debugTag("A • STEP "+step)}
     <div class="hero">${decodeURIComponent(msg)}</div>
   `;
 
-  scripts[mode][1].forEach(o=>{
+  options.forEach(o=>{
     html+=`<button class="button" onclick="send('${o}','${mode}',${step+1})">${o}</button>`;
   });
 
