@@ -6,25 +6,28 @@
   <!-- Mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Optional Vercel Analytics -->
+  <!-- Premium Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+  <!-- Vercel Analytics (safe to keep, ignore 404 locally) -->
   <script defer src="/_vercel/insights/script.js"></script>
 
   <style>
     body {
       background: #000;
       color: #E6D2C6;
-      font-family: Georgia, serif;
+      font-family: 'Cormorant Garamond', serif;
       text-align: center;
       padding: 40px 15px;
     }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 10px;
     }
 
-    p {
-      font-family: Arial, sans-serif;
-      color: #ccc;
+    p, .button, .tone, .subtle {
+      font-family: 'Inter', sans-serif;
     }
 
     .button {
@@ -34,32 +37,34 @@
       margin: 10px auto;
       padding: 16px;
       border-radius: 999px;
+      border: none;
       background: #E6D2C6;
       color: #000;
-      text-decoration: none;
-      font-family: Arial, sans-serif;
+      font-size: clamp(14px, 4vw, 18px);
       cursor: pointer;
+      text-decoration: none;
     }
 
     #result {
       margin-top: 30px;
-      font-size: 24px;
+      font-size: clamp(20px, 5vw, 30px);
     }
 
     .tone {
+      margin-top: 10px;
       font-size: 14px;
       color: #aaa;
-      margin-top: 10px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin-top: 30px;
+      color: #ccc;
     }
 
     .hero {
-      font-size: 32px;
+      font-size: clamp(28px, 6vw, 44px);
       margin-top: 20px;
-    }
-
-    .subtle {
-      font-size: 14px;
-      color: #aaa;
     }
   </style>
 </head>
@@ -79,110 +84,78 @@
 <script>
 
 /* =========================
-   GLOBAL STATE
+   TRACKING HELPER
 ========================= */
-window.currentMode = null;
-window.currentOptions = [];
+function track(event, data = {}) {
+  if (window.va) window.va('event', event, data);
+}
 
 /* =========================
-   URL PARAMS
+   URL STATE (CORE ENGINE)
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
 const incoming = params.get("msg");
-const incomingMode = params.get("mode");
-const threadId = params.get("thread") || Date.now();
+const mode = params.get("mode");
+const thread = params.get("thread") || Date.now();
 
 /* =========================
-   TRACKING
-========================= */
-function track(event, data = {}) {
-  console.log("📊", event, data);
-  if (window.va) window.va('event', event, data);
-}
-
-console.log("Page loaded", { incoming, incomingMode, threadId });
-
-/* =========================
-   INCOMING MESSAGE VIEW
+   CONTINUATION FLOW (RECEIVER VIEW)
+   If message exists → CONTINUE conversation
 ========================= */
 if (incoming) {
 
-  track("incoming_open", { threadId, mode: incomingMode });
+  track("incoming_open", { mode });
+
+  const responses = getResponses(mode);
 
   document.body.innerHTML = `
-    <h1>Psst…</h1>
+    <h1>Showing your brave side, I see.</h1>
 
     <div id="result">
 
-      <div class="subtle">Someone’s thinking about you.</div>
+      <div class="hero">${decodeURIComponent(incoming)}</div>
 
-      <div class="hero">
-        ${decodeURIComponent(incoming)}
-      </div>
-
-      <div class="tone">
-        So… do you wanna play?
-      </div>
+      <div class="tone">Your turn…</div>
 
       <br>
 
-      <a href="?reply=true&mode=${incomingMode}&thread=${threadId}" class="button">
-        Why yes I do
-      </a>
-
-      <a href="?decline=true&mode=${incomingMode}&thread=${threadId}" class="button">
-        Not now
-      </a>
+      ${responses.map((r, i) => `
+        <button class="button" onclick="sendChoice(${i})">${r}</button>
+      `).join("")}
 
     </div>
   `;
 
-  throw new Error("stop execution");
-}
-
-/* =========================
-   YES FLOW
-========================= */
-if (params.get("reply")) {
-
-  track("clicked_yes", { threadId, mode: incomingMode });
-
-  const responses = [
-    "Careful… I might take you up on that.",
-    "Alright… but you’re making the first move.",
-    "You started this. Don’t disappear now."
-  ];
-
-  renderOptions(responses, incomingMode);
-}
-
-/* =========================
-   NO FLOW
-========================= */
-if (params.get("decline")) {
-
-  track("clicked_no", { threadId, mode: incomingMode });
-
-  const text = "Not tonight… but don’t stop trying 😏";
-  const link = buildLink(text, incomingMode);
-
-  renderSendScreen(text, link);
-}
-
-/* =========================
-   START MODE
-========================= */
-function startMode(mode) {
-
+  window.currentOptions = responses;
   window.currentMode = mode;
 
-  track("mode_selected", { mode });
+  throw new Error("stop render");
+}
 
-  let options = [];
+/* =========================
+   START MODE (INITIAL USER)
+========================= */
+function startMode(selectedMode) {
+
+  track("mode_selected", { mode: selectedMode });
+
+  const options = getResponses(selectedMode);
+
+  renderOptions("Pick your move...", options);
+
+  window.currentOptions = options;
+  window.currentMode = selectedMode;
+}
+
+/* =========================
+   RESPONSE ENGINE (FIXED ISSUE)
+   Each mode now has UNIQUE responses
+========================= */
+function getResponses(mode) {
 
   if (mode === "date") {
-    options = [
+    return [
       "You’ve had my attention all day.",
       "Tonight doesn’t need a plan.",
       "Don’t make me overthink this."
@@ -190,7 +163,7 @@ function startMode(mode) {
   }
 
   if (mode === "dinner") {
-    options = [
+    return [
       "Pick a place. I’m in.",
       "You choose… I’ll handle the rest.",
       "Something easy… then we stay in 😏"
@@ -198,7 +171,7 @@ function startMode(mode) {
   }
 
   if (mode === "fate") {
-    options = [
+    return [
       "No thinking—first idea wins.",
       "Flip a coin and commit.",
       "You decide. No take-backs."
@@ -206,25 +179,22 @@ function startMode(mode) {
   }
 
   if (mode === "reconnect") {
-    options = [
+    return [
       "Come sit with me for a minute.",
       "Tell me what’s been on your mind.",
       "Let’s reset… just us."
     ];
   }
 
-  renderOptions(options, mode);
+  return ["Hmm… try again."];
 }
 
 /* =========================
    RENDER OPTIONS
 ========================= */
-function renderOptions(options, mode) {
+function renderOptions(title, options) {
 
-  window.currentOptions = options;
-  window.currentMode = mode;
-
-  let html = "";
+  let html = `<div class="section-title">${title}</div>`;
 
   options.forEach((opt, index) => {
     html += `<button class="button" onclick="sendChoice(${index})">${opt}</button>`;
@@ -234,43 +204,21 @@ function renderOptions(options, mode) {
 }
 
 /* =========================
-   SEND MESSAGE
+   SEND MESSAGE (CORE LOOP)
+   Builds message + keeps thread + mode alive
 ========================= */
 function sendChoice(index) {
 
   const text = window.currentOptions[index];
 
-  console.log("💬 Selected:", text);
-  console.log("🧠 Mode:", window.currentMode);
-  console.log("🔗 Thread:", threadId);
-
-  track("message_selected", {
-    text,
-    mode: window.currentMode,
-    threadId
-  });
-
-  const link = buildLink(text, window.currentMode);
-
-  renderSendScreen(text, link);
-}
-
-/* =========================
-   BUILD LINK
-========================= */
-function buildLink(text, mode) {
-  return `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&thread=${threadId}`;
-}
-
-/* =========================
-   SEND SCREEN
-========================= */
-function renderSendScreen(text, link) {
+  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&thread=${thread}`;
 
   const fullMessage = `${text} 😏\n\n${link}`;
 
+  track("message_sent", { text, mode: window.currentMode });
+
   document.body.innerHTML = `
-    <h1>Showing your brave side, I see.</h1>
+    <h1>Send it…</h1>
 
     <div id="result">
 
@@ -278,28 +226,23 @@ function renderSendScreen(text, link) {
 
       <br><br>
 
-      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">
-        Send it
-      </a>
+      <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send it</a>
 
-      <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">
-        Email it
-      </a>
+      <a href="mailto:?subject=Nudra&body=${encodeURIComponent(fullMessage)}" class="button">Email it</a>
 
-      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">
-        Copy
-      </button>
+      <button class="button" onclick="copyMessage('${encodeURIComponent(fullMessage)}')">Copy</button>
 
     </div>
   `;
 }
 
 /* =========================
-   COPY
+   COPY HELPER
 ========================= */
 function copyMessage(encoded) {
-  navigator.clipboard.writeText(decodeURIComponent(encoded));
-  alert("Copied!");
+  const decoded = decodeURIComponent(encoded);
+  navigator.clipboard.writeText(decoded);
+  alert("Copied");
 }
 
 </script>
