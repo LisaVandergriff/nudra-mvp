@@ -16,7 +16,17 @@
       padding: 40px 15px;
       margin: 0;
     }
-
+    
+  .debug {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: rgba(230,210,192,0.6);
+  letter-spacing: 1px;
+   }
+    
     #app {
       transition: opacity 0.4s ease;
     }
@@ -127,6 +137,10 @@
 <div id="app"></div>
 
 <script>
+
+function debugTag(text){
+return `<div class="debug">${text}</div>`;
+}
 
 /* =========================
    URL STATE
