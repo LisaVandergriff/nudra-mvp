@@ -31,35 +31,74 @@
       margin-bottom: 20px;
     }
 
+    /* =========================
+       ORB (flutter + fade out)
+    ========================= */
     .orb {
       width: 120px;
       height: 120px;
       border-radius: 50%;
       margin: 40px auto;
-      background: radial-gradient(circle, rgba(230,210,192,0.25), rgba(230,210,192,0.05));
+      background: radial-gradient(circle, rgba(230,210,192,0.35), rgba(230,210,192,0.05));
       box-shadow:
-        0 0 20px rgba(230,210,192,0.3),
-        0 0 60px rgba(230,210,192,0.15);
-      animation: pulse 3.5s infinite ease-in-out;
+        0 0 25px rgba(230,210,192,0.4),
+        0 0 70px rgba(230,210,192,0.2);
       opacity: 0;
-      transition: opacity 0.8s ease;
+      transform: scale(0.95);
     }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.07); }
-      100% { transform: scale(1); }
+    .orb.active {
+      animation: flutter 2.2s ease-in-out forwards;
+      opacity: 1;
     }
 
+    .orb.fade-out {
+      animation: fadeOrb 1s ease forwards;
+    }
+
+    @keyframes flutter {
+      0%   { transform: scale(0.9); opacity: 0; }
+      30%  { transform: scale(1.08); }
+      55%  { transform: scale(0.98); }
+      75%  { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeOrb {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.85); }
+    }
+
+    /* =========================
+       WHISPER (bigger entrance)
+    ========================= */
     .whisper {
-      font-size: 14px;
-      color: rgba(230,210,192,0.6);
       font-family: 'Inter', sans-serif;
       margin-top: 10px;
       opacity: 0;
-      transition: opacity 0.8s ease;
+      transform: translateY(10px);
     }
 
+    .whisper.show {
+      animation: whisperIn 1s ease forwards;
+    }
+
+    @keyframes whisperIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+        font-size: 14px;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        font-size: 18px;
+      }
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
     .buttons {
       margin-top: 30px;
       opacity: 0;
@@ -109,7 +148,7 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE (LOCKED)
+   SCRIPT ENGINE (LOCKED A)
 ========================= */
 const scripts = {
   fate: [
@@ -131,97 +170,50 @@ const scripts = {
 };
 
 /* =========================
-   WEIGHTED RANDOM
+   B OPTIONS
 ========================= */
-function pickWeighted(list) {
-  const expanded = [];
-  list.forEach(item => {
-    for (let i = 0; i < item.weight; i++) {
-      expanded.push(item.text);
-    }
-  });
-  return expanded[Math.floor(Math.random() * expanded.length)];
-}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
-/* =========================
-   B OPTIONS (WEIGHTED)
-========================= */
 const bOptions = {
   fate: {
-    yes: [
-      { text: "Let’s see where this goes", weight: 3 },
-      { text: "Your move", weight: 2 },
-      { text: "Alright… surprise me", weight: 1 }
-    ],
-    no: [
-      { text: "Not now… but I’m curious", weight: 3 },
-      { text: "This isn’t over", weight: 2 },
-      { text: "Come back to this", weight: 1 }
-    ]
+    yes: ["Let’s see where this goes","Your move","Alright… surprise me"],
+    no: ["Not now… but I’m curious","This isn’t over","Come back to this"]
   },
   reconnect: {
-    yes: [
-      { text: "Stay with me", weight: 3 },
-      { text: "I’m here", weight: 2 },
-      { text: "Talk to me", weight: 1 }
-    ],
-    no: [
-      { text: "I see you… just not right now.", weight: 3 },
-      { text: "I want this… just not in this moment.", weight: 2 },
-      { text: "Give me a minute", weight: 1 }
-    ]
+    yes: ["Stay with me","I’m here","Talk to me"],
+    no: ["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"]
   },
   date: {
-    yes: [
-      { text: "Come closer", weight: 3 },
-      { text: "Keep going…", weight: 2 },
-      { text: "I’m listening", weight: 1 }
-    ],
-    no: [
-      { text: "Mmm… bad timing. Don’t stop though.", weight: 3 },
-      { text: "Not now… but I like where this is going.", weight: 2 },
-      { text: "Try me again later", weight: 1 }
-    ]
+    yes: ["Come closer","Keep going…","I’m listening"],
+    no: ["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"]
   },
   dinner: {
-    yes: [
-      { text: "Fine… I’m in", weight: 3 },
-      { text: "Pick for me", weight: 2 },
-      { text: "Let’s do something easy", weight: 1 }
-    ],
-    no: [
-      { text: "Bad timing… but I like this", weight: 3 },
-      { text: "Later… don’t lose that energy", weight: 2 },
-      { text: "Try me again tonight", weight: 1 }
-    ]
+    yes: ["Fine… I’m in","Pick for me","Let’s do something easy"],
+    no: ["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"]
   }
 };
 
 /* =========================
    FADE
 ========================= */
-function fadeTo(html) {
-  const app = document.getElementById("app");
-  app.style.opacity = 0;
-
-  setTimeout(() => {
-    app.innerHTML = html;
-    app.style.opacity = 1;
-  }, 200);
+function fadeTo(html){
+  const app=document.getElementById("app");
+  app.style.opacity=0;
+  setTimeout(()=>{app.innerHTML=html;app.style.opacity=1;},200);
 }
 
 /* =========================
-   A FLOW (LOCKED)
+   A FLOW (DO NOT TOUCH)
 ========================= */
-function showHome() {
+function showHome(){
   fadeTo(`
-    <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
+    <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
     <div class="orb" style="opacity:1" onclick="showDirections()"></div>
   `);
 }
 
-function showDirections() {
+function showDirections(){
   fadeTo(`
     <h1>What are we feeling?</h1>
     <button class="button" onclick="startMode('dinner')">Dinner</button>
@@ -231,92 +223,84 @@ function showDirections() {
   `);
 }
 
-function startMode(selectedMode) {
-  const options = scripts[selectedMode][0];
-
-  let html = ``;
-
-  options.forEach(opt => {
-    html += `<button class="button" onclick="sendChoice('${opt}', '${selectedMode}', 2)">${opt}</button>`;
+function startMode(mode){
+  const options=scripts[mode][0];
+  let html=``;
+  options.forEach(o=>{
+    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',2)">${o}</button>`;
   });
-
   fadeTo(html);
 }
 
-function sendChoice(text, mode, nextStep) {
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
-  const fullMessage = `${text}\n\n${link}`;
-
+function sendChoice(text,mode,nextStep){
+  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+  const full=`${text}\n\n${link}`;
   fadeTo(`
-    <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send</a>
-    <button class="button" onclick="copyMsg('${encodeURIComponent(fullMessage)}')">Copy</button>
+    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
+    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
   `);
 }
 
-function copyMsg(encoded) {
-  navigator.clipboard.writeText(decodeURIComponent(encoded));
-}
-
 /* =========================
-   B FLOW (SLOW BURN)
+   B FLOW (UPGRADED)
 ========================= */
-if (msg && !accepted) {
+if(msg && !accepted){
 
-  const pool = bOptions[mode] || bOptions["date"];
-  const yesText = pickWeighted(pool.yes);
-  const noText = pickWeighted(pool.no);
+  const pool=bOptions[mode]||bOptions.date;
+  const yes=pick(pool.yes);
+  const no=pick(pool.no);
 
   fadeTo(`
     <div class="hero">${decodeURIComponent(msg)}</div>
+
     <div id="orb" class="orb"></div>
+
     <div id="whisper" class="whisper">…I hope you join me</div>
 
     <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">${yesText}</button>
-      <button class="button" onclick="goHome()">${noText}</button>
+      <button class="button" onclick="accept()">${yes}</button>
+      <button class="button" onclick="goHome()">${no}</button>
     </div>
   `);
 
-  // staged reveal
-  setTimeout(() => {
-    document.getElementById("orb").style.opacity = 1;
-  }, 600);
+  // ORB APPEAR + FLUTTER
+  setTimeout(()=>{
+    document.getElementById("orb").classList.add("active");
+  },500);
 
-  setTimeout(() => {
-    document.getElementById("whisper").style.opacity = 1;
-  }, 1600);
+  // ORB DISAPPEAR
+  setTimeout(()=>{
+    document.getElementById("orb").classList.add("fade-out");
+  },2200);
 
-  setTimeout(() => {
-    document.getElementById("buttons").style.opacity = 1;
-  }, 2600);
+  // WHISPER ENTER (bigger)
+  setTimeout(()=>{
+    document.getElementById("whisper").classList.add("show");
+  },2600);
 
+  // BUTTONS
+  setTimeout(()=>{
+    document.getElementById("buttons").style.opacity=1;
+  },3400);
 }
-else if (msg && accepted) {
+else if(msg && accepted){
 
-  const options = scripts[mode]?.[step - 1] || ["…"];
-
-  let html = `<div class="hero">${decodeURIComponent(msg)}</div>`;
-
-  options.forEach(opt => {
-    html += `<button class="button" onclick="sendChoice('${opt}', '${mode}', ${step + 1})">${opt}</button>`;
+  const options=scripts[mode]?.[step-1]||["…"];
+  let html=`<div class="hero">${decodeURIComponent(msg)}</div>`;
+  options.forEach(o=>{
+    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
-
   fadeTo(html);
-
 }
-else {
+else{
   showHome();
 }
 
-/* =========================
-   NAV
-========================= */
-function accept() {
-  window.location.href = `?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
+function accept(){
+  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&accepted=true`;
 }
-
-function goHome() {
-  window.location.href = "/";
+function goHome(){
+  window.location.href="/";
 }
 
 </script>
