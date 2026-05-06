@@ -17,41 +17,60 @@
       margin: 0;
     }
 
-    #app { transition: opacity 0.3s ease; }
+    #app {
+      transition: opacity 0.4s ease;
+    }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
 
     .hero {
-      font-size: clamp(24px, 4vw, 36px);
-      margin-bottom: 40px;
+      font-size: clamp(26px, 4vw, 36px);
+      margin-bottom: 20px;
     }
 
     .orb {
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      margin: 30px auto;
+      margin: 40px auto;
       background: radial-gradient(circle, rgba(230,210,192,0.25), rgba(230,210,192,0.05));
       box-shadow:
         0 0 20px rgba(230,210,192,0.3),
         0 0 60px rgba(230,210,192,0.15);
-      animation: pulse 3s infinite ease-in-out;
+      animation: pulse 3.5s infinite ease-in-out;
+      opacity: 0;
+      transition: opacity 0.8s ease;
     }
 
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+      50% { transform: scale(1.07); }
       100% { transform: scale(1); }
+    }
+
+    .whisper {
+      font-size: 14px;
+      color: rgba(230,210,192,0.6);
+      font-family: 'Inter', sans-serif;
+      margin-top: 10px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .buttons {
+      margin-top: 30px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
     }
 
     .button {
       display: block;
       width: 90%;
       max-width: 320px;
-      margin: 14px auto;
+      margin: 12px auto;
       padding: 16px;
       border-radius: 999px;
       border: 1px solid rgba(230,210,192,0.25);
@@ -69,13 +88,6 @@
       background: rgba(230,210,192,0.14);
       box-shadow: 0 0 20px rgba(230,210,192,0.25);
       transform: scale(1.03);
-    }
-
-    .whisper {
-      font-size: 14px;
-      color: rgba(230,210,192,0.6);
-      margin-top: 10px;
-      font-family: 'Inter', sans-serif;
     }
   </style>
 </head>
@@ -97,7 +109,7 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE (UNCHANGED)
+   SCRIPT ENGINE (LOCKED)
 ========================= */
 const scripts = {
   fate: [
@@ -119,7 +131,7 @@ const scripts = {
 };
 
 /* =========================
-   WEIGHTED RANDOM PICK
+   WEIGHTED RANDOM
 ========================= */
 function pickWeighted(list) {
   const expanded = [];
@@ -132,36 +144,9 @@ function pickWeighted(list) {
 }
 
 /* =========================
-   B BUTTON POOLS (WEIGHTED)
+   B OPTIONS (WEIGHTED)
 ========================= */
 const bOptions = {
-
-  date: {
-    yes: [
-      { text: "Come closer", weight: 3 },
-      { text: "Keep going…", weight: 2 },
-      { text: "I’m listening", weight: 1 }
-    ],
-    no: [
-      { text: "Mmm… bad timing. Don’t stop though.", weight: 3 },
-      { text: "Not now… but I like where this is going.", weight: 2 },
-      { text: "Try me again later", weight: 1 }
-    ]
-  },
-
-  reconnect: {
-    yes: [
-      { text: "Stay with me", weight: 3 },
-      { text: "I’m here", weight: 2 },
-      { text: "Talk to me", weight: 1 }
-    ],
-    no: [
-      { text: "I see you… just not right now.", weight: 3 },
-      { text: "I want this… just not in this moment.", weight: 2 },
-      { text: "Give me a minute, don’t disappear", weight: 1 }
-    ]
-  },
-
   fate: {
     yes: [
       { text: "Let’s see where this goes", weight: 3 },
@@ -174,7 +159,30 @@ const bOptions = {
       { text: "Come back to this", weight: 1 }
     ]
   },
-
+  reconnect: {
+    yes: [
+      { text: "Stay with me", weight: 3 },
+      { text: "I’m here", weight: 2 },
+      { text: "Talk to me", weight: 1 }
+    ],
+    no: [
+      { text: "I see you… just not right now.", weight: 3 },
+      { text: "I want this… just not in this moment.", weight: 2 },
+      { text: "Give me a minute", weight: 1 }
+    ]
+  },
+  date: {
+    yes: [
+      { text: "Come closer", weight: 3 },
+      { text: "Keep going…", weight: 2 },
+      { text: "I’m listening", weight: 1 }
+    ],
+    no: [
+      { text: "Mmm… bad timing. Don’t stop though.", weight: 3 },
+      { text: "Not now… but I like where this is going.", weight: 2 },
+      { text: "Try me again later", weight: 1 }
+    ]
+  },
   dinner: {
     yes: [
       { text: "Fine… I’m in", weight: 3 },
@@ -187,7 +195,6 @@ const bOptions = {
       { text: "Try me again tonight", weight: 1 }
     ]
   }
-
 };
 
 /* =========================
@@ -204,20 +211,19 @@ function fadeTo(html) {
 }
 
 /* =========================
-   HOME (A)
+   A FLOW (LOCKED)
 ========================= */
 function showHome() {
   fadeTo(`
     <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
-    <div class="orb" onclick="showDirections()"></div>
+    <div class="orb" style="opacity:1" onclick="showDirections()"></div>
   `);
 }
 
 function showDirections() {
   fadeTo(`
     <h1>What are we feeling?</h1>
-
     <button class="button" onclick="startMode('dinner')">Dinner</button>
     <button class="button" onclick="startMode('date')">Date Night</button>
     <button class="button" onclick="startMode('fate')">Fate</button>
@@ -237,13 +243,8 @@ function startMode(selectedMode) {
   fadeTo(html);
 }
 
-/* =========================
-   SEND (UNCHANGED)
-========================= */
 function sendChoice(text, mode, nextStep) {
-
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
-
   const fullMessage = `${text}\n\n${link}`;
 
   fadeTo(`
@@ -257,27 +258,40 @@ function copyMsg(encoded) {
 }
 
 /* =========================
-   B EXPERIENCE (UPGRADED)
+   B FLOW (SLOW BURN)
 ========================= */
 if (msg && !accepted) {
 
   const pool = bOptions[mode] || bOptions["date"];
-
   const yesText = pickWeighted(pool.yes);
   const noText = pickWeighted(pool.no);
 
   fadeTo(`
     <div class="hero">${decodeURIComponent(msg)}</div>
+    <div id="orb" class="orb"></div>
+    <div id="whisper" class="whisper">…I hope you join me</div>
 
-    <div class="orb"></div>
-
-    <div class="whisper">…I hope you join me</div>
-
-    <button class="button" onclick="accept()">${yesText}</button>
-    <button class="button" onclick="goHome()">${noText}</button>
+    <div id="buttons" class="buttons">
+      <button class="button" onclick="accept()">${yesText}</button>
+      <button class="button" onclick="goHome()">${noText}</button>
+    </div>
   `);
 
-} else if (msg && accepted) {
+  // staged reveal
+  setTimeout(() => {
+    document.getElementById("orb").style.opacity = 1;
+  }, 600);
+
+  setTimeout(() => {
+    document.getElementById("whisper").style.opacity = 1;
+  }, 1600);
+
+  setTimeout(() => {
+    document.getElementById("buttons").style.opacity = 1;
+  }, 2600);
+
+}
+else if (msg && accepted) {
 
   const options = scripts[mode]?.[step - 1] || ["…"];
 
@@ -289,10 +303,9 @@ if (msg && !accepted) {
 
   fadeTo(html);
 
-} else {
-
+}
+else {
   showHome();
-
 }
 
 /* =========================
