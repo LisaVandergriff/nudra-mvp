@@ -12,75 +12,61 @@
     body {
       background: #000;
       color: #E6D2C0;
-      margin: 0;
       font-family: 'Cormorant Garamond', serif;
-    }
-
-    .center {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .brand {
-      letter-spacing: 8px;
-      font-size: 18px;
-      opacity: 0.7;
-      margin-bottom: 20px;
-    }
-
-    .hero {
-      font-size: clamp(26px, 5vw, 36px);
       text-align: center;
-      margin-bottom: 40px;
+      padding: 40px 15px;
     }
 
-    .tone {
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 10px;
+    }
+
+    .subtle {
       font-family: 'Inter', sans-serif;
-      font-size: 14px;
       color: #aaa;
-      margin-top: 10px;
+      font-size: 14px;
     }
 
     .button {
-      font-family: 'Inter', sans-serif;
       display: block;
       width: 90%;
       max-width: 320px;
       margin: 10px auto;
-      padding: 14px;
+      padding: 16px;
       border-radius: 999px;
       border: none;
       background: #E6D2C0;
       color: #000;
-      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
       text-decoration: none;
     }
 
-    .orb {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 1px solid rgba(230,210,192,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 40px rgba(230,210,192,0.2);
-      cursor: pointer;
+    .hero {
+      font-size: 30px;
+      margin: 20px 0;
     }
 
-    #app {
-      padding: 30px;
-      text-align: center;
+    #result {
+      margin-top: 30px;
     }
   </style>
 </head>
 
 <body>
 
-<div id="app"></div>
+<h1>Let’s not overthink this…</h1>
+<p class="subtle">Just pick a direction.</p>
+
+<!-- DISGUISED MODES -->
+<button class="button" onclick="startMode('dinner')">Stay in tonight</button>
+<button class="button" onclick="startMode('date')">Go out and see what happens</button>
+<button class="button" onclick="startMode('fate')">Surprise me</button>
+<button class="button" onclick="startMode('reconnect')">Just us… no distractions</button>
+
+<div id="result"></div>
 
 <script>
 
@@ -91,24 +77,26 @@ const params = new URLSearchParams(window.location.search);
 
 const msg = params.get("msg");
 const mode = params.get("mode");
-const step = parseInt(params.get("step") || "1");
+let step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE (FINAL)
+   SCRIPT ENGINE
+   opener = initiator
+   responses = receiver progression
 ========================= */
 const scripts = {
 
-  reconnect: {
+  dinner: {
     opener: [
-      "Come sit with me for a minute.",
-      "Tell me what’s been on your mind.",
-      "Let’s reset… just us."
+      "Pick a place. I’m in.",
+      "You choose… I’ll handle the rest.",
+      "Something easy… then we stay in 😉"
     ],
     responses: [
-      ["You always know how to pull me in.", "Alright… I’m here.", "Talk to me…"],
-      ["That’s exactly what I needed.", "Don’t disappear now.", "Stay with me."],
-      ["Yeah… this feels right.", "Let’s not lose this.", "I’m glad you said something."]
+      ["That was too easy…", "You didn’t even hesitate 😏", "I like where this is going"],
+      ["Alright… now you’ve got my attention", "Careful… I might expect more", "So what happens after?"],
+      ["Yeah… we’re not backing out now", "You started this", "This was a good call"]
     ]
   },
 
@@ -119,22 +107,22 @@ const scripts = {
       "Don’t make me overthink this."
     ],
     responses: [
-      ["Careful… I might take you up on that.", "You’re starting something here.", "Alright… what’s next?"],
-      ["You always pull me in like this.", "Okay… I’m listening.", "Go on…"],
-      ["No backing out now.", "You win.", "Guess we’re doing this."]
+      ["Careful… I might take you up on that", "You’re starting something here", "Alright… what’s next?"],
+      ["You always do this to me", "Okay… I’m listening", "Go on…"],
+      ["No backing out now", "You win", "Guess we’re doing this"]
     ]
   },
 
-  dinner: {
+  reconnect: {
     opener: [
-      "Let’s not overthink this—pick a place.",
-      "You pick dinner… I’ll make the rest interesting.",
-      "Easy night… or is it?"
+      "Come sit with me for a minute.",
+      "Tell me what’s been on your mind.",
+      "Let’s reset… just us."
     ],
     responses: [
-      ["Pick a place. I’m in.", "You choose… I’ll handle the rest.", "Something easy… then we stay in 😉"],
-      ["Alright… now I’m curious.", "You always do this to me.", "So what happens after dinner?"],
-      ["Guess we’re committed now.", "No backing out.", "Yeah… this was a good call."]
+      ["You always know when to do this", "Alright… I’m here", "Talk to me…"],
+      ["That’s exactly what I needed", "Don’t disappear now", "Stay with me"],
+      ["Yeah… this feels right", "Let’s not lose this", "I’m glad you said something"]
     ]
   },
 
@@ -145,83 +133,31 @@ const scripts = {
       "You decide. No take-backs."
     ],
     responses: [
-      ["Well… now I’m curious.", "You really went with that?", "Okay… I’m in."],
-      ["This is either genius or chaos.", "You’re dangerous 😂", "Alright… let’s go"],
-      ["Guess fate made the call.", "No regrets.", "We’re doing this."]
+      ["Well… now I’m curious", "You really went with that?", "Okay… I’m in"],
+      ["This could go either way", "You’re dangerous 😂", "Alright… let’s go"],
+      ["Guess fate made the call", "No regrets", "We’re doing this"]
     ]
   }
 
 };
 
 /* =========================
-   STEP ENGINE (FIXED)
-========================= */
-function getStepOptions(mode, step) {
-
-  const sets = scripts[mode].responses;
-
-  const index = Math.floor((step - 2) / 2);
-
-  if (index < sets.length) return sets[index];
-
-  return sets[sets.length - 1];
-}
-
-/* =========================
-   LANDING SCREEN
-========================= */
-function renderLanding() {
-  document.getElementById("app").innerHTML = `
-    <div class="center">
-
-      <div class="brand">LURRE</div>
-
-      <div class="hero">
-        Welcome back.<br>
-        Come play with me.
-      </div>
-
-      <div class="orb" onclick="enterApp()">⟡</div>
-
-    </div>
-  `;
-}
-
-/* =========================
-   MODE SELECT
-========================= */
-function enterApp() {
-  document.getElementById("app").innerHTML = `
-    <div class="hero">What are we feeling?</div>
-
-    <button class="button" onclick="startMode('dinner')">Dinner</button>
-    <button class="button" onclick="startMode('date')">Date Night</button>
-    <button class="button" onclick="startMode('fate')">Fate</button>
-    <button class="button" onclick="startMode('reconnect')">Reconnect</button>
-
-    <div id="result"></div>
-  `;
-}
-
-/* =========================
-   INITIATOR FLOW (A)
+   START MODE (INITIATOR)
 ========================= */
 function startMode(selectedMode) {
 
-  const options = scripts[selectedMode].opener;
-
   window.currentMode = selectedMode;
-  window.currentOptions = options;
+  window.currentOptions = scripts[selectedMode].opener;
 
-  renderOptions(options, "Pick your move…");
+  render("Pick your move…", window.currentOptions);
 }
 
 /* =========================
    RENDER OPTIONS
 ========================= */
-function renderOptions(options, title) {
+function render(title, options) {
 
-  let html = `<div class="tone">${title}</div><br>`;
+  let html = `<div class="subtle">${title}</div><br>`;
 
   options.forEach((opt, i) => {
     html += `<button class="button" onclick="sendChoice(${i})">${opt}</button>`;
@@ -231,16 +167,19 @@ function renderOptions(options, title) {
 }
 
 /* =========================
-   SEND MESSAGE
+   SEND MESSAGE (LINK ONLY)
 ========================= */
 function sendChoice(i) {
 
   const text = window.currentOptions[i];
+
   const nextStep = step + 1;
 
-  const link = `${location.origin}?msg=${encodeURIComponent(text)}&mode=${window.currentMode}&step=${nextStep}&accepted=true`;
+  const link = `https://nudra-mvp.vercel.app/?mode=${window.currentMode}&step=${nextStep}&accepted=true`;
 
-  document.getElementById("app").innerHTML = `
+  document.body.innerHTML = `
+    <h1>Send it…</h1>
+
     <div class="hero">${text}</div>
 
     <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
@@ -249,38 +188,44 @@ function sendChoice(i) {
 }
 
 /* =========================
-   INCOMING FLOW (B)
+   INCOMING FLOW
 ========================= */
 
-if (msg && !accepted) {
+if (mode && !accepted) {
 
-  document.getElementById("app").innerHTML = `
-    <div class="hero">${decodeURIComponent(msg)}</div>
-    <div class="tone">Do you want to play?</div>
+  document.body.innerHTML = `
+    <h1>Psst…</h1>
 
-    <a href="?msg=${encodeURIComponent(msg)}&mode=${mode}&step=2&accepted=true" class="button">Yes</a>
+    <div class="hero">Someone’s thinking about you.</div>
+    <div class="subtle">Do you want to play?</div>
+
+    <a href="?mode=${mode}&step=${step}&accepted=true" class="button">Yes</a>
     <a href="/" class="button">Not now</a>
   `;
 
-}
-else if (msg && accepted) {
+} else if (mode && accepted) {
 
-  const options = getStepOptions(mode, step);
+  const script = scripts[mode];
+
+  // prevent overflow → loop last step instead of breaking
+  if (step > script.responses.length) {
+    step = script.responses.length;
+  }
+
+  const options = script.responses[step - 1];
 
   window.currentMode = mode;
   window.currentOptions = options;
 
-  document.getElementById("app").innerHTML = `
-    <div class="hero">${decodeURIComponent(msg)}</div>
-    <div class="tone">Your turn…</div>
+  document.body.innerHTML = `
+    <h1>Showing your brave side, I see.</h1>
+
+    <div class="subtle">Your turn…</div>
 
     <div id="result"></div>
   `;
 
-  renderOptions(options, "");
-}
-else {
-  renderLanding();
+  render("", options);
 }
 
 </script>
