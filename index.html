@@ -17,9 +17,7 @@
       margin: 0;
     }
 
-    #app {
-      transition: opacity 0.3s ease;
-    }
+    #app { transition: opacity 0.3s ease; }
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
@@ -41,7 +39,6 @@
         0 0 20px rgba(230,210,192,0.3),
         0 0 60px rgba(230,210,192,0.15);
       animation: pulse 3s infinite ease-in-out;
-      cursor: pointer;
     }
 
     @keyframes pulse {
@@ -74,16 +71,10 @@
       transform: scale(1.03);
     }
 
-    .subtle {
-      font-size: 14px;
-      color: rgba(230,210,192,0.5);
-      margin-bottom: 10px;
-    }
-
     .whisper {
-      font-size: 16px;
+      font-size: 14px;
       color: rgba(230,210,192,0.6);
-      margin: 20px 0 10px;
+      margin-top: 10px;
       font-family: 'Inter', sans-serif;
     }
   </style>
@@ -125,6 +116,78 @@ const scripts = {
     ["Stay in tonight", "Go out and see what happens", "Surprise me"],
     ["Now I’m invested.", "You always do this.", "Where is this going?"]
   ]
+};
+
+/* =========================
+   WEIGHTED RANDOM PICK
+========================= */
+function pickWeighted(list) {
+  const expanded = [];
+  list.forEach(item => {
+    for (let i = 0; i < item.weight; i++) {
+      expanded.push(item.text);
+    }
+  });
+  return expanded[Math.floor(Math.random() * expanded.length)];
+}
+
+/* =========================
+   B BUTTON POOLS (WEIGHTED)
+========================= */
+const bOptions = {
+
+  date: {
+    yes: [
+      { text: "Come closer", weight: 3 },
+      { text: "Keep going…", weight: 2 },
+      { text: "I’m listening", weight: 1 }
+    ],
+    no: [
+      { text: "Mmm… bad timing. Don’t stop though.", weight: 3 },
+      { text: "Not now… but I like where this is going.", weight: 2 },
+      { text: "Try me again later", weight: 1 }
+    ]
+  },
+
+  reconnect: {
+    yes: [
+      { text: "Stay with me", weight: 3 },
+      { text: "I’m here", weight: 2 },
+      { text: "Talk to me", weight: 1 }
+    ],
+    no: [
+      { text: "I see you… just not right now.", weight: 3 },
+      { text: "I want this… just not in this moment.", weight: 2 },
+      { text: "Give me a minute, don’t disappear", weight: 1 }
+    ]
+  },
+
+  fate: {
+    yes: [
+      { text: "Let’s see where this goes", weight: 3 },
+      { text: "Your move", weight: 2 },
+      { text: "Alright… surprise me", weight: 1 }
+    ],
+    no: [
+      { text: "Not now… but I’m curious", weight: 3 },
+      { text: "This isn’t over", weight: 2 },
+      { text: "Come back to this", weight: 1 }
+    ]
+  },
+
+  dinner: {
+    yes: [
+      { text: "Fine… I’m in", weight: 3 },
+      { text: "Pick for me", weight: 2 },
+      { text: "Let’s do something easy", weight: 1 }
+    ],
+    no: [
+      { text: "Bad timing… but I like this", weight: 3 },
+      { text: "Later… don’t lose that energy", weight: 2 },
+      { text: "Try me again tonight", weight: 1 }
+    ]
+  }
+
 };
 
 /* =========================
@@ -194,19 +257,24 @@ function copyMsg(encoded) {
 }
 
 /* =========================
-   B EXPERIENCE (UPGRADED ONLY)
+   B EXPERIENCE (UPGRADED)
 ========================= */
 if (msg && !accepted) {
+
+  const pool = bOptions[mode] || bOptions["date"];
+
+  const yesText = pickWeighted(pool.yes);
+  const noText = pickWeighted(pool.no);
 
   fadeTo(`
     <div class="hero">${decodeURIComponent(msg)}</div>
 
     <div class="orb"></div>
 
-    <div class="whisper">…you can ignore this<br>or lean into it</div>
+    <div class="whisper">…I hope you join me</div>
 
-    <button class="button" onclick="accept()">Stay a minute</button>
-    <button class="button" onclick="goHome()">Not now</button>
+    <button class="button" onclick="accept()">${yesText}</button>
+    <button class="button" onclick="goHome()">${noText}</button>
   `);
 
 } else if (msg && accepted) {
