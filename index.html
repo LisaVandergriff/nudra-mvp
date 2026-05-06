@@ -275,7 +275,7 @@ function sendChoice(text,mode,nextStep){
 /* =========================
    B FLOW (UNCHANGED FOR NOW)
 ========================= */
-if(msg && !accepted){
+if(msg && !accepted && !bStep){
 
   const pool=bOptions[mode]||bOptions.date;
   const yes=pick(pool.yes);
