@@ -5,7 +5,6 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
   <style>
@@ -18,16 +17,15 @@
       margin: 0;
     }
 
+    #app {
+      transition: opacity 0.3s ease;
+    }
+
     h1 {
       font-size: clamp(28px, 5vw, 42px);
       margin-bottom: 30px;
     }
 
-    #app {
-      transition: opacity 0.3s ease;
-    }
-
-    /* ORB */
     .orb {
       width: 120px;
       height: 120px;
@@ -47,7 +45,6 @@
       100% { transform: scale(1); }
     }
 
-    /* BUTTONS */
     .button {
       display: block;
       width: 90%;
@@ -63,12 +60,19 @@
       cursor: pointer;
       backdrop-filter: blur(6px);
       transition: all 0.25s ease;
+      text-decoration: none;
     }
 
     .button:hover {
       background: rgba(230,210,192,0.14);
       box-shadow: 0 0 20px rgba(230,210,192,0.25);
       transform: scale(1.03);
+    }
+
+    .subtle {
+      font-size: 14px;
+      color: rgba(230,210,192,0.4);
+      margin-bottom: 10px;
     }
 
   </style>
@@ -78,11 +82,10 @@
 
 <div id="app">
 
-  <!-- OPENING -->
+  <!-- OPEN -->
   <div>
     <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
-
     <div class="orb" onclick="showDirections()"></div>
   </div>
 
@@ -90,40 +93,29 @@
 
 <script>
 
-/* =========================
-   SCRIPTS (CHOICES ONLY)
-========================= */
 const scripts = {
-
   fate: [
     "Flip a coin and commit.",
     "You decide. No take-backs.",
     "No thinking—first idea wins."
   ],
-
   reconnect: [
     "Tell me what’s been on your mind.",
     "Let’s reset… just us.",
     "Come sit with me for a minute."
   ],
-
   date: [
     "Tonight doesn’t need a plan.",
     "Don’t make me overthink this.",
     "You’ve had my attention all day."
   ],
-
   dinner: [
     "Stay in tonight",
     "Go out and see what happens",
     "Surprise me"
   ]
-
 };
 
-/* =========================
-   FADE
-========================= */
 function fadeTo(html) {
   const app = document.getElementById("app");
   app.style.opacity = 0;
@@ -134,11 +126,7 @@ function fadeTo(html) {
   }, 200);
 }
 
-/* =========================
-   DIRECTIONS
-========================= */
 function showDirections() {
-
   fadeTo(`
     <h1>What are we feeling?</h1>
 
@@ -149,9 +137,6 @@ function showDirections() {
   `);
 }
 
-/* =========================
-   MODE → ONLY BUTTONS
-========================= */
 function startMode(mode) {
 
   const options = scripts[mode];
@@ -166,17 +151,20 @@ function startMode(mode) {
 }
 
 /* =========================
-   SEND
+   FIXED SEND FLOW
+   (NO TEXT REPEAT)
 ========================= */
 function sendChoice(text) {
 
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
   fadeTo(`
-    <h1>${text}</h1>
 
-    <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
-    <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email it</a>
+    <div class="subtle">Ready?</div>
+
+    <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send</a>
+    <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email</a>
+
   `);
 }
 
