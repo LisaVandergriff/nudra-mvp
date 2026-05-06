@@ -75,7 +75,7 @@
 
 <div id="app">
 
-  <!-- OPEN -->
+  <!-- OPEN SCREEN -->
   <div>
     <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
@@ -86,6 +86,9 @@
 
 <script>
 
+/* =========================
+   SCRIPT OPTIONS (NO DUPES)
+========================= */
 const scripts = {
   fate: [
     "Flip a coin and commit.",
@@ -109,6 +112,9 @@ const scripts = {
   ]
 };
 
+/* =========================
+   FADE TRANSITION
+========================= */
 function fadeTo(html) {
   const app = document.getElementById("app");
   app.style.opacity = 0;
@@ -119,6 +125,9 @@ function fadeTo(html) {
   }, 200);
 }
 
+/* =========================
+   STEP 1: DIRECTIONS
+========================= */
 function showDirections() {
   fadeTo(`
     <h1>What are we feeling?</h1>
@@ -130,6 +139,9 @@ function showDirections() {
   `);
 }
 
+/* =========================
+   STEP 2: OPTIONS (NO HEADER)
+========================= */
 function startMode(mode) {
 
   const options = scripts[mode];
@@ -143,16 +155,33 @@ function startMode(mode) {
   fadeTo(html);
 }
 
+/* =========================
+   STEP 3: SEND (CLEAN)
+========================= */
 function sendChoice(text) {
 
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
+  // IMPORTANT: include phrase in message, not UI
+  const fullMessage = `${text}\n\n${link}`;
+
   fadeTo(`
 
-    <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send</a>
-    <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email</a>
+    <a href="sms:?body=${encodeURIComponent(fullMessage)}" class="button">Send</a>
+
+    <button class="button" onclick="copyMsg('${encodeURIComponent(fullMessage)}')">
+      Copy
+    </button>
 
   `);
+}
+
+/* =========================
+   COPY HELPER
+========================= */
+function copyMsg(encoded) {
+  const decoded = decodeURIComponent(encoded);
+  navigator.clipboard.writeText(decoded);
 }
 
 </script>
