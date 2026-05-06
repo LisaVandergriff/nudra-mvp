@@ -20,13 +20,6 @@
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
-      margin-bottom: 10px;
-    }
-
-    .sub {
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      color: #aaa;
       margin-bottom: 30px;
     }
 
@@ -62,8 +55,8 @@
       margin: 12px auto;
       padding: 16px;
       border-radius: 999px;
-      border: 1px solid rgba(230,210,192,0.3);
-      background: rgba(230,210,192,0.08);
+      border: 1px solid rgba(230,210,192,0.25);
+      background: rgba(230,210,192,0.06);
       color: #E6D2C0;
       font-family: 'Inter', sans-serif;
       font-size: 16px;
@@ -73,16 +66,13 @@
     }
 
     .button:hover {
-      background: rgba(230,210,192,0.15);
+      background: rgba(230,210,192,0.12);
       box-shadow:
         0 0 10px rgba(230,210,192,0.25),
-        0 0 25px rgba(230,210,192,0.15);
+        0 0 25px rgba(230,210,192,0.12);
       transform: scale(1.03);
     }
 
-    #result {
-      margin-top: 20px;
-    }
   </style>
 </head>
 
@@ -90,14 +80,12 @@
 
 <div id="app">
 
-  <!-- OPENING SCREEN -->
+  <!-- OPENING -->
   <div id="opening">
     <div style="letter-spacing:4px; font-size:14px;">LURRE</div>
     <h1>Welcome back.<br>Come play with me.</h1>
 
     <div class="orb" onclick="showDirections()"></div>
-
-    <div class="sub">Tap to begin</div>
   </div>
 
 </div>
@@ -112,8 +100,9 @@ const scripts = {
   dinner: {
     opener: [
       "Let’s not overthink this…",
-      "You pick dinner… I’ll make the rest interesting.",
-      "Easy night… or is it?"
+      "Stay in tonight",
+      "Go out and see what happens",
+      "Surprise me"
     ]
   },
 
@@ -144,7 +133,7 @@ const scripts = {
 };
 
 /* =========================
-   TRANSITION HELPER
+   FADE TRANSITION
 ========================= */
 function fadeTo(html) {
   const app = document.getElementById("app");
@@ -157,13 +146,12 @@ function fadeTo(html) {
 }
 
 /* =========================
-   STEP 1: DIRECTIONS
+   DIRECTIONS SCREEN
 ========================= */
 function showDirections() {
 
   fadeTo(`
     <h1>What are we feeling?</h1>
-    <div class="sub">Just pick a direction.</div>
 
     <button class="button" onclick="startMode('dinner')">Dinner</button>
     <button class="button" onclick="startMode('date')">Date Night</button>
@@ -173,18 +161,18 @@ function showDirections() {
 }
 
 /* =========================
-   STEP 2: PROMPTS (NO STACKING)
+   MODE SCREEN
 ========================= */
 function startMode(mode) {
 
   const options = scripts[mode].opener;
 
-  let html = `
-    <h1>${options[0]}</h1>
-    <div class="sub">Just pick a move.</div>
-  `;
+  const hero = options[0];
+  const choices = options.slice(1);
 
-  options.forEach((opt, i) => {
+  let html = `<h1>${hero}</h1>`;
+
+  choices.forEach(opt => {
     html += `<button class="button" onclick="sendChoice('${opt}')">${opt}</button>`;
   });
 
@@ -192,7 +180,7 @@ function startMode(mode) {
 }
 
 /* =========================
-   STEP 3: SEND
+   SEND SCREEN
 ========================= */
 function sendChoice(text) {
 
@@ -200,7 +188,6 @@ function sendChoice(text) {
 
   fadeTo(`
     <h1>${text}</h1>
-    <div class="sub">Send it…</div>
 
     <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
     <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email it</a>
