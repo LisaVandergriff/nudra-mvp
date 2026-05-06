@@ -52,21 +52,40 @@
     #result {
       margin-top: 30px;
     }
+
+    /* ✨ Orb */
+    .orb {
+      width: 120px;
+      height: 120px;
+      margin: 40px auto;
+      border-radius: 50%;
+      border: 1px solid #E6D2C0;
+      position: relative;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .orb:hover {
+      box-shadow: 0 0 25px rgba(230,210,192,0.4);
+    }
+
+    .orb::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: #E6D2C0;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 
 <body>
 
-<h1>Let’s not overthink this…</h1>
-<p class="subtle">Just pick a direction.</p>
-
-<!-- DISGUISED MODES -->
-<button class="button" onclick="startMode('dinner')">Stay in tonight</button>
-<button class="button" onclick="startMode('date')">Go out and see what happens</button>
-<button class="button" onclick="startMode('fate')">Surprise me</button>
-<button class="button" onclick="startMode('reconnect')">Just us… no distractions</button>
-
-<div id="result"></div>
+<div id="app"></div>
 
 <script>
 
@@ -75,15 +94,12 @@
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
-const msg = params.get("msg");
 const mode = params.get("mode");
 let step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 
 /* =========================
-   SCRIPT ENGINE
-   opener = initiator
-   responses = receiver progression
+   SCRIPT ENGINE (UNCHANGED)
 ========================= */
 const scripts = {
 
@@ -142,7 +158,36 @@ const scripts = {
 };
 
 /* =========================
-   START MODE (INITIATOR)
+   OPENING SCREEN
+========================= */
+function showOpening() {
+  document.getElementById("app").innerHTML = `
+    <div class="subtle">LURRE</div>
+    <h1>Welcome back.<br>Come play with me.</h1>
+
+    <div class="orb" onclick="showMain()"></div>
+  `;
+}
+
+/* =========================
+   MAIN DECISION SCREEN
+========================= */
+function showMain() {
+  document.getElementById("app").innerHTML = `
+    <h1>Let’s not overthink this…</h1>
+    <p class="subtle">Just pick a direction.</p>
+
+    <button class="button" onclick="startMode('dinner')">Stay in tonight</button>
+    <button class="button" onclick="startMode('date')">Go out and see what happens</button>
+    <button class="button" onclick="startMode('fate')">Surprise me</button>
+    <button class="button" onclick="startMode('reconnect')">Just us… no distractions</button>
+
+    <div id="result"></div>
+  `;
+}
+
+/* =========================
+   START MODE
 ========================= */
 function startMode(selectedMode) {
 
@@ -153,7 +198,7 @@ function startMode(selectedMode) {
 }
 
 /* =========================
-   RENDER OPTIONS
+   RENDER
 ========================= */
 function render(title, options) {
 
@@ -167,20 +212,16 @@ function render(title, options) {
 }
 
 /* =========================
-   SEND MESSAGE (LINK ONLY)
+   SEND
 ========================= */
 function sendChoice(i) {
-
-  const text = window.currentOptions[i];
 
   const nextStep = step + 1;
 
   const link = `https://nudra-mvp.vercel.app/?mode=${window.currentMode}&step=${nextStep}&accepted=true`;
 
-  document.body.innerHTML = `
+  document.getElementById("app").innerHTML = `
     <h1>Send it…</h1>
-
-    <div class="hero">${text}</div>
 
     <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send it</a>
     <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email it</a>
@@ -188,12 +229,11 @@ function sendChoice(i) {
 }
 
 /* =========================
-   INCOMING FLOW
+   INCOMING FLOW (UNCHANGED)
 ========================= */
-
 if (mode && !accepted) {
 
-  document.body.innerHTML = `
+  document.getElementById("app").innerHTML = `
     <h1>Psst…</h1>
 
     <div class="hero">Someone’s thinking about you.</div>
@@ -207,7 +247,6 @@ if (mode && !accepted) {
 
   const script = scripts[mode];
 
-  // prevent overflow → loop last step instead of breaking
   if (step > script.responses.length) {
     step = script.responses.length;
   }
@@ -217,7 +256,7 @@ if (mode && !accepted) {
   window.currentMode = mode;
   window.currentOptions = options;
 
-  document.body.innerHTML = `
+  document.getElementById("app").innerHTML = `
     <h1>Showing your brave side, I see.</h1>
 
     <div class="subtle">Your turn…</div>
@@ -226,6 +265,11 @@ if (mode && !accepted) {
   `;
 
   render("", options);
+
+} else {
+
+  // 👇 ONLY SHOW OPENING IF NO FLOW
+  showOpening();
 }
 
 </script>
