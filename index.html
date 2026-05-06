@@ -266,7 +266,7 @@ function sendChoice(text,mode,nextStep){
   const full=`${inviteText}\n\n${link}`;
 
   fadeTo(`
-    ${debugTag("A • SEND")}
+    ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
     <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
     <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
   `);
