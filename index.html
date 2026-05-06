@@ -68,13 +68,6 @@
       box-shadow: 0 0 20px rgba(230,210,192,0.25);
       transform: scale(1.03);
     }
-
-    .subtle {
-      font-size: 14px;
-      color: rgba(230,210,192,0.4);
-      margin-bottom: 10px;
-    }
-
   </style>
 </head>
 
@@ -150,17 +143,11 @@ function startMode(mode) {
   fadeTo(html);
 }
 
-/* =========================
-   FIXED SEND FLOW
-   (NO TEXT REPEAT)
-========================= */
 function sendChoice(text) {
 
   const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}`;
 
   fadeTo(`
-
-    <div class="subtle">Ready?</div>
 
     <a href="sms:?body=${encodeURIComponent(link)}" class="button">Send</a>
     <a href="mailto:?subject=Lurre&body=${encodeURIComponent(link)}" class="button">Email</a>
