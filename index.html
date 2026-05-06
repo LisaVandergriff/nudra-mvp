@@ -51,6 +51,16 @@
       color: #aaa;
       margin-top: 10px;
     }
+
+    .hero {
+      font-size: 32px;
+      margin-top: 20px;
+    }
+
+    .subtle {
+      font-size: 14px;
+      color: #aaa;
+    }
   </style>
 </head>
 
@@ -75,11 +85,89 @@ window.currentMode = null;
 window.currentOptions = [];
 
 /* =========================
+   URL PARAMS
+========================= */
+const params = new URLSearchParams(window.location.search);
+
+const incoming = params.get("msg");
+const incomingMode = params.get("mode");
+const threadId = params.get("thread") || Date.now();
+
+/* =========================
    TRACKING
 ========================= */
 function track(event, data = {}) {
   console.log("📊", event, data);
   if (window.va) window.va('event', event, data);
+}
+
+console.log("Page loaded", { incoming, incomingMode, threadId });
+
+/* =========================
+   INCOMING MESSAGE VIEW
+========================= */
+if (incoming) {
+
+  track("incoming_open", { threadId, mode: incomingMode });
+
+  document.body.innerHTML = `
+    <h1>Psst…</h1>
+
+    <div id="result">
+
+      <div class="subtle">Someone’s thinking about you.</div>
+
+      <div class="hero">
+        ${decodeURIComponent(incoming)}
+      </div>
+
+      <div class="tone">
+        So… do you wanna play?
+      </div>
+
+      <br>
+
+      <a href="?reply=true&mode=${incomingMode}&thread=${threadId}" class="button">
+        Why yes I do
+      </a>
+
+      <a href="?decline=true&mode=${incomingMode}&thread=${threadId}" class="button">
+        Not now
+      </a>
+
+    </div>
+  `;
+
+  throw new Error("stop execution");
+}
+
+/* =========================
+   YES FLOW
+========================= */
+if (params.get("reply")) {
+
+  track("clicked_yes", { threadId, mode: incomingMode });
+
+  const responses = [
+    "Careful… I might take you up on that.",
+    "Alright… but you’re making the first move.",
+    "You started this. Don’t disappear now."
+  ];
+
+  renderOptions(responses, incomingMode);
+}
+
+/* =========================
+   NO FLOW
+========================= */
+if (params.get("decline")) {
+
+  track("clicked_no", { threadId, mode: incomingMode });
+
+  const text = "Not tonight… but don’t stop trying 😏";
+  const link = buildLink(text, incomingMode);
+
+  renderSendScreen(text, link);
 }
 
 /* =========================
@@ -89,12 +177,10 @@ function startMode(mode) {
 
   window.currentMode = mode;
 
-  console.log("🎯 Mode selected:", mode);
   track("mode_selected", { mode });
 
   let options = [];
 
-  // MODE-SPECIFIC OPTIONS
   if (mode === "date") {
     options = [
       "You’ve had my attention all day.",
@@ -127,15 +213,16 @@ function startMode(mode) {
     ];
   }
 
-  renderOptions(options);
+  renderOptions(options, mode);
 }
 
 /* =========================
    RENDER OPTIONS
 ========================= */
-function renderOptions(options) {
+function renderOptions(options, mode) {
 
   window.currentOptions = options;
+  window.currentMode = mode;
 
   let html = "";
 
@@ -153,22 +240,35 @@ function sendChoice(index) {
 
   const text = window.currentOptions[index];
 
-  console.log("💬 Message selected:", text);
+  console.log("💬 Selected:", text);
   console.log("🧠 Mode:", window.currentMode);
+  console.log("🔗 Thread:", threadId);
 
   track("message_selected", {
     text,
-    mode: window.currentMode
+    mode: window.currentMode,
+    threadId
   });
 
-  // BUILD LINK
-  const link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${window.currentMode}`;
+  const link = buildLink(text, window.currentMode);
+
+  renderSendScreen(text, link);
+}
+
+/* =========================
+   BUILD LINK
+========================= */
+function buildLink(text, mode) {
+  return `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&thread=${threadId}`;
+}
+
+/* =========================
+   SEND SCREEN
+========================= */
+function renderSendScreen(text, link) {
 
   const fullMessage = `${text} 😏\n\n${link}`;
 
-  console.log("📤 Ready to send:", fullMessage);
-
-  // RENDER SEND SCREEN
   document.body.innerHTML = `
     <h1>Showing your brave side, I see.</h1>
 
