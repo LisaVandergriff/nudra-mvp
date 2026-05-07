@@ -340,7 +340,57 @@ else if(msg && accepted){
 
   let html=`${debugTag("A • RETURN (current)")}<div class="hero">${decodeURIComponent(msg)}</div>`;
 
-  html+=`<button class="button">...</button>`;
+  const reactions = {
+  "Don’t stop": [
+    "Careful… I might take you up on that.",
+    "You’re asking for trouble.",
+    "I was hoping you’d say that."
+  ],
+  "You’ve got me": [
+    "Good… don’t lose that feeling.",
+    "Then stay right there with me.",
+    "That’s exactly where I wanted you."
+  ],
+  "Careful… keep going": [
+    "Careful isn’t really my style.",
+    "You might regret that.",
+    "Or you might love it."
+  ]
+};
+
+const options = reactions[msg] || [
+  "Stay with me.",
+  "Don’t disappear now.",
+  "I’m not done yet."
+];
+
+options.forEach(o=>{
+  html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+});
+
+  html += `
+  <div style="margin-top:20px; opacity:0.6; font-size:14px; font-family:'Inter', sans-serif;">
+    or say something…
+  </div>
+
+  <input id="freeText"
+    placeholder="say something…"
+    style="
+      width:90%;
+      max-width:320px;
+      margin:10px auto;
+      padding:14px;
+      border-radius:999px;
+      border:1px solid rgba(230,210,192,0.25);
+      background:rgba(230,210,192,0.05);
+      color:#E6D2C0;
+      display:block;
+      text-align:center;
+      outline:none;
+    " />
+
+  <button class="button" onclick="sendFreeText()">Send</button>
+`;
 
   fadeTo(html);
 }
@@ -367,6 +417,15 @@ function goHome(){
   window.location.href="/";
 }
 
+function sendFreeText(){
+  const input = document.getElementById("freeText");
+  const text = input.value.trim();
+  
+  if(!text) return;
+  
+  sendChoice(text, mode, step+1);
+}
+  
 </script>
 
 </body>
