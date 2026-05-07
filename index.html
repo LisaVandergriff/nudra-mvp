@@ -259,7 +259,9 @@ function startMode(mode){
 ========================= */
 function sendChoice(text,mode,nextStep){
 
-  const link=`https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+  const link = bStep === "1"
+  ? `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`
+  : `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
 
   const inviteText = getInviteText();
 
