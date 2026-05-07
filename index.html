@@ -1,27 +1,160 @@
-<script>
-// @ts-check
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lurre</title>
 
-/* =========================
-   DEBUG TAG (top-left label)
-========================= */
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background: #000;
+      color: #E6D2C0;
+      font-family: 'Cormorant Garamond', serif;
+      text-align: center;
+      padding: 40px 15px;
+      margin: 0;
+    }
+    
+  .debug {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: rgba(230,210,192,0.6);
+  letter-spacing: 1px;
+   }
+    
+    #app {
+      transition: opacity 0.4s ease;
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      margin-bottom: 40px;
+    }
+
+    .hero {
+      font-size: clamp(26px, 4vw, 36px);
+      margin-bottom: 20px;
+    }
+
+    .orb {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 40px auto;
+      background: radial-gradient(circle, rgba(230,210,192,0.35), rgba(230,210,192,0.05));
+      box-shadow:
+        0 0 25px rgba(230,210,192,0.4),
+        0 0 70px rgba(230,210,192,0.2);
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    .orb.active {
+      animation: flutter 2.8s ease-in-out forwards;
+      opacity: 1;
+    }
+
+    .orb.fade-out {
+      animation: fadeOrb 1.5s ease forwards;
+    }
+
+    @keyframes flutter {
+      0%   { transform: scale(0.9); opacity: 0; }
+      30%  { transform: scale(1.08); }
+      55%  { transform: scale(0.98); }
+      75%  { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeOrb {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.85); }
+    }
+
+    .whisper {
+      font-family: 'Inter', sans-serif;
+      margin-top: 10px;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .whisper.show {
+      animation: whisperIn 1.2s ease forwards;
+    }
+
+    @keyframes whisperIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+        font-size: 14px;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        font-size: 18px;
+      }
+    }
+
+    .buttons {
+      margin-top: 30px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .button {
+      display: block;
+      width: 90%;
+      max-width: 320px;
+      margin: 12px auto;
+      padding: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(230,210,192,0.25);
+      background: rgba(230,210,192,0.06);
+      color: #E6D2C0;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.25s ease;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      background: rgba(230,210,192,0.14);
+      box-shadow: 0 0 20px rgba(230,210,192,0.25);
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+
 function debugTag(text){
-  return `<div class="debug">${text}</div>`;
+return `<div class="debug">${text}</div>`;
 }
 
 /* =========================
-   URL STATE (SOURCE OF TRUTH)
-   Controls WHO and WHERE we are
+   URL STATE
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
-const msg = params.get("msg");          // message being passed
-const mode = params.get("mode");        // mode (date, fate, etc)
-const step = parseInt(params.get("step") || "1"); // progression
-const accepted = params.get("accepted"); // B has engaged
-const bStep = params.get("bStep");      // B is actively responding
+const msg = params.get("msg");
+const mode = params.get("mode");
+const step = parseInt(params.get("step") || "1");
+const accepted = params.get("accepted");
+const bStep = params.get("bStep");  
 
 /* =========================
-   INVITE TEXT (A → B opener)
+   INVITE TEXT (NEW FIX)
 ========================= */
 function getInviteText() {
   const invites = [
@@ -35,7 +168,7 @@ function getInviteText() {
 }
 
 /* =========================
-   SCRIPT ENGINE (A INIT ONLY)
+   SCRIPT ENGINE (LOCKED)
 ========================= */
 const scripts = {
   fate: [
@@ -57,7 +190,7 @@ const scripts = {
 };
 
 /* =========================
-   B OPTIONS (INVITE ONLY)
+   B OPTIONS
 ========================= */
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
@@ -81,7 +214,7 @@ const bOptions = {
 };
 
 /* =========================
-   FADE TRANSITION
+   FADE
 ========================= */
 function fadeTo(html){
   const app=document.getElementById("app");
@@ -90,7 +223,7 @@ function fadeTo(html){
 }
 
 /* =========================
-   A FLOW (INITIATOR)
+   A FLOW (UNCHANGED)
 ========================= */
 function showHome(){
   fadeTo(`
@@ -122,23 +255,17 @@ function startMode(mode){
 }
 
 /* =========================
-   SEND ENGINE (A ↔ B HANDOFF)
+   SEND (FIXED — NO PHRASE)
 ========================= */
 function sendChoice(text,mode,nextStep){
 
-  // IMPORTANT: determines direction of flow
-  let link;
-
-  if (bStep === "1") {
-    // B sending → goes back to A RETURN
-    link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`;
-  } else {
-    // A sending → goes to B INVITE
-    link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
-  }
+  const link = bStep === "1"
+  ? `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`
+  : `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
 
   const inviteText = getInviteText();
-  const full = `${inviteText}\n\n${link}`;
+
+  const full=`${inviteText}\n\n${link}`;
 
   fadeTo(`
     ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
@@ -148,29 +275,26 @@ function sendChoice(text,mode,nextStep){
 }
 
 /* =========================
-   B FLOW
+   B FLOW (UNCHANGED FOR NOW)
 ========================= */
-
-/* STEP 1A — B ENGAGED (YES PATH) */
-if(bStep === "1"){
+ if(bStep === "1"){
+  const options = bOptions[mode] || bOptions.date;
   let html = `${debugTag("B • STEP 1A")}`;
   html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
-
   const responses = [
-    "Don’t stop",
-    "You’ve got me",
-    "Alright… now what?",
-    "Careful… keep going"
-  ];
+  "Don’t stop",
+  "You’ve got me",
+  "Alright… now what?",
+  "Careful… keep going"
+];
 
-  responses.forEach(o=>{
-    html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
-  });
-
+responses.forEach(o=>{
+  html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+});
+ 
   fadeTo(html);
-}
-
-/* B INVITE — FIRST TOUCH */
+} 
+  
 else if(msg && !accepted && !bStep){
 
   const pool=bOptions[mode]||bOptions.date;
@@ -181,7 +305,7 @@ else if(msg && !accepted && !bStep){
     ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
 
-    <div id="buttons" class="buttons">
+      <div id="buttons" class="buttons">
       <button class="button" onclick="accept()">${yes}</button>
       <button class="button" onclick="goHome()">${no}</button>
     </div>
@@ -189,59 +313,46 @@ else if(msg && !accepted && !bStep){
 
   setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},4200);
 }
-
-/* =========================
-   A RETURN (RESPONSE-DRIVEN)
-   B said something → A reacts
-========================= */
 else if(msg && accepted){
 
   const reactions = {
-    "Don’t stop": [
-      "Careful… I might take you up on that.",
-      "You’re asking for trouble.",
-      "I was hoping you’d say that."
-    ],
-    "You’ve got me": [
-      "Good… don’t lose that feeling.",
-      "Then stay right there with me.",
-      "That’s exactly where I wanted you."
-    ],
-    "Alright… now what?": [
-      "Now we see how far this goes.",
-      "Now you don’t get to back out.",
-      "Now it gets interesting."
-    ],
-    "Careful… keep going": [
-      "Careful isn’t really my style.",
-      "You might regret that.",
-      "Or you might love it."
-    ]
-  };
+  "Don’t stop": [
+    "Careful… I might take you up on that.",
+    "You’re asking for trouble.",
+    "I was hoping you’d say that."
+  ],
+  "You’ve got me": [
+    "Good… don’t lose that feeling.",
+    "Then stay right there with me.",
+    "That’s exactly where I wanted you."
+  ],
+  "Alright… now what?": [
+    "Now we see how far this goes.",
+    "Now you don’t get to back out.",
+    "Now it gets interesting."
+  ],
+  "Careful… keep going": [
+    "Careful isn’t really my style.",
+    "You might regret that.",
+    "Or you might love it."
+  ]
+};
 
-  const options = reactions[msg] || [
-    "Stay with me.",
-    "Don’t disappear now.",
-    "I’m not done yet."
-  ];
-
-  let html=`${debugTag("A • RETURN")}<div class="hero">${decodeURIComponent(msg)}</div>`;
-
+const options = reactions[msg] || [
+  "Stay with me.",
+  "Don’t disappear now.",
+  "I’m not done yet."
+];
+  let html=`${debugTag("A • RETURN (current)")}<div class="hero">${decodeURIComponent(msg)}</div>`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
   });
-
   fadeTo(html);
 }
-
-/* DEFAULT — BACK TO A */
 else{
   showHome();
 }
 
-/* =========================
-   ACTIONS
-========================= */
 function accept(){
   window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&bStep=1`;
 }
@@ -251,3 +362,6 @@ function goHome(){
 }
 
 </script>
+
+</body>
+</html>
