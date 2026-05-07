@@ -17,15 +17,18 @@
       margin: 0;
     }
     
-  .debug {
-  position: fixed;
-  top: 10px;
-  left: 12px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: rgba(230,210,192,0.6);
-  letter-spacing: 1px;
-   }
+    /* =========================
+       DEBUG TAG (TOP LEFT LABEL)
+    ========================= */
+    .debug {
+      position: fixed;
+      top: 10px;
+      left: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(230,210,192,0.6);
+      letter-spacing: 1px;
+    }
     
     #app {
       transition: opacity 0.4s ease;
@@ -88,16 +91,8 @@
     }
 
     @keyframes whisperIn {
-      0% {
-        opacity: 0;
-        transform: translateY(10px);
-        font-size: 14px;
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-        font-size: 18px;
-      }
+      0% { opacity: 0; transform: translateY(10px); font-size: 14px; }
+      100% { opacity: 1; transform: translateY(0); font-size: 18px; }
     }
 
     .buttons {
@@ -138,12 +133,15 @@
 
 <script>
 
+/* =========================
+   DEBUG HELPER
+========================= */
 function debugTag(text){
-return `<div class="debug">${text}</div>`;
+  return `<div class="debug">${text}</div>`;
 }
 
 /* =========================
-   URL STATE
+   URL STATE (SOURCE OF TRUTH)
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
@@ -151,10 +149,10 @@ const msg = params.get("msg");
 const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
-const bStep = params.get("bStep");  
+const bStep = params.get("bStep");
 
 /* =========================
-   INVITE TEXT (NEW FIX)
+   INVITE TEXT (A → B)
 ========================= */
 function getInviteText() {
   const invites = [
@@ -168,7 +166,7 @@ function getInviteText() {
 }
 
 /* =========================
-   SCRIPT ENGINE (LOCKED)
+   SCRIPT ENGINE (A INIT ONLY)
 ========================= */
 const scripts = {
   fate: [
@@ -190,7 +188,7 @@ const scripts = {
 };
 
 /* =========================
-   B OPTIONS
+   B OPTIONS (INVITE)
 ========================= */
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
@@ -214,7 +212,7 @@ const bOptions = {
 };
 
 /* =========================
-   FADE
+   FADE TRANSITION
 ========================= */
 function fadeTo(html){
   const app=document.getElementById("app");
@@ -223,7 +221,7 @@ function fadeTo(html){
 }
 
 /* =========================
-   A FLOW (UNCHANGED)
+   A FLOW (INITIATOR)
 ========================= */
 function showHome(){
   fadeTo(`
@@ -255,7 +253,7 @@ function startMode(mode){
 }
 
 /* =========================
-   SEND (FIXED — NO PHRASE)
+   SEND ENGINE (HANDOFF)
 ========================= */
 function sendChoice(text,mode,nextStep){
 
@@ -264,7 +262,6 @@ function sendChoice(text,mode,nextStep){
   : `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
 
   const inviteText = getInviteText();
-
   const full=`${inviteText}\n\n${link}`;
 
   fadeTo(`
@@ -275,83 +272,63 @@ function sendChoice(text,mode,nextStep){
 }
 
 /* =========================
-   B FLOW (UNCHANGED FOR NOW)
+   B FLOW (RESPONDER)
 ========================= */
- if(bStep === "1"){
-  const options = bOptions[mode] || bOptions.date;
+
+// STEP 1A — YES PATH
+if(bStep === "1"){
   let html = `${debugTag("B • STEP 1A")}`;
   html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
+
   const responses = [
-  "Don’t stop",
-  "You’ve got me",
-  "Alright… now what?",
-  "Careful… keep going"
-];
+    "Don’t stop",
+    "You’ve got me",
+    "Alright… now what?",
+    "Careful… keep going"
+  ];
 
-responses.forEach(o=>{
-  html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
-});
- 
+  responses.forEach(o=>{
+    html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  });
+
   fadeTo(html);
-} 
-  
-else if(msg && !accepted && !bStep){
+}
 
-  const pool=bOptions[mode]||bOptions.date;
-  const yes=pick(pool.yes);
-  const no=pick(pool.no);
+/* STEP 1B — NO PATH (PLACEHOLDER) */
+
+else if(msg && !accepted && !bStep){
 
   fadeTo(`
     ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
 
-      <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">${yes}</button>
-      <button class="button" onclick="decline()">${no}</button>
+    <div id="buttons" class="buttons">
+      <button class="button" onclick="accept()">Yes</button>
+      <button class="button" onclick="decline()">No</button>
     </div>
   `);
-
-  setTimeout(()=>{document.getElementById("buttons").style.opacity=1;},4200);
 }
+
+/* A RETURN — LOOP BACK */
+
 else if(msg && accepted){
 
-  const reactions = {
-  "Don’t stop": [
-    "Careful… I might take you up on that.",
-    "You’re asking for trouble.",
-    "I was hoping you’d say that."
-  ],
-  "You’ve got me": [
-    "Good… don’t lose that feeling.",
-    "Then stay right there with me.",
-    "That’s exactly where I wanted you."
-  ],
-  "Alright… now what?": [
-    "Now we see how far this goes.",
-    "Now you don’t get to back out.",
-    "Now it gets interesting."
-  ],
-  "Careful… keep going": [
-    "Careful isn’t really my style.",
-    "You might regret that.",
-    "Or you might love it."
-  ]
-};
-
-const options = reactions[msg] || [
-  "Stay with me.",
-  "Don’t disappear now.",
-  "I’m not done yet."
-];
   let html=`${debugTag("A • RETURN (current)")}<div class="hero">${decodeURIComponent(msg)}</div>`;
-  options.forEach(o=>{
-    html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
-  });
+
+  html+=`<button class="button">...</button>`;
+
   fadeTo(html);
 }
+
+/* FALLBACK */
+
 else{
   showHome();
 }
+
+/* =========================
+   ACTIONS
+========================= */
 
 function accept(){
   window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&bStep=1`;
