@@ -279,9 +279,16 @@ function sendChoice(text,mode,nextStep){
   const options = bOptions[mode] || bOptions.date;
   let html = `${debugTag("B • STEP 1A")}`;
   html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
-  options.yes.forEach(o=>{
-    html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
-  });
+  const responses = [
+  "Don’t stop",
+  "You’ve got me",
+  "Alright… now what?",
+  "Careful… keep going"
+];
+
+responses.forEach(o=>{
+  html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+});
   html += `<button class="button" onclick="goHome()">Not now</button>`;
   fadeTo(html);
 } 
