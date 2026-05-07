@@ -294,8 +294,26 @@ if(bStep === "1"){
   fadeTo(html);
 }
 
-/* STEP 1B — NO PATH (PLACEHOLDER) */
+/* STEP 1B — NO PATH (SOFT DECLINE) */
+else if(bStep === "2"){
+  let html = `${debugTag("B • STEP 1B")}`;
+  html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
 
+  const responses = [
+    "Not now… but don’t stop",
+    "Hold that thought",
+    "Bad timing… try me again",
+    "I like this… just later"
+  ];
+
+  responses.forEach(o=>{
+    html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  });
+
+  fadeTo(html);
+}
+
+/* B INVITE — FIRST TOUCH */
 else if(msg && !accepted && !bStep){
 
   fadeTo(`
