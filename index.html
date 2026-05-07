@@ -315,7 +315,7 @@ else if(msg && !accepted && !bStep){
 }
 else if(msg && accepted){
 
-  const options=scripts[mode]?.[step-1]||["…"];
+  const options = scripts[mode]?.[Math.min(step-1, scripts[mode].length-1)] || ["…"];
   let html=`${debugTag("A • RETURN (current)")}<div class="hero">${decodeURIComponent(msg)}</div>`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
