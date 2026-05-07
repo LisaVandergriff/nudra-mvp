@@ -289,7 +289,7 @@ function sendChoice(text,mode,nextStep){
 responses.forEach(o=>{
   html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
 });
-  html += `<button class="button" onclick="goHome()">Not now</button>`;
+ 
   fadeTo(html);
 } 
   
