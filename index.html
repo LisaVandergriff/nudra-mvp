@@ -1,21 +1,27 @@
+<script>
+// @ts-check
+
+/* =========================
+   DEBUG TAG (top-left label)
+========================= */
 function debugTag(text){
   return `<div class="debug">${text}</div>`;
 }
 
 /* =========================
    URL STATE (SOURCE OF TRUTH)
-   Determines WHO and WHERE we are in the flow
+   Controls WHO and WHERE we are
 ========================= */
 const params = new URLSearchParams(window.location.search);
 
-const msg = params.get("msg");          // Message being passed between A ↔ B
-const mode = params.get("mode");        // Mode (date, fate, reconnect, etc.)
-const step = parseInt(params.get("step") || "1"); // Progression step
-const accepted = params.get("accepted"); // Indicates B already engaged
-const bStep = params.get("bStep");      // Indicates B is actively responding
+const msg = params.get("msg");          // message being passed
+const mode = params.get("mode");        // mode (date, fate, etc)
+const step = parseInt(params.get("step") || "1"); // progression
+const accepted = params.get("accepted"); // B has engaged
+const bStep = params.get("bStep");      // B is actively responding
 
 /* =========================
-   INVITE TEXT (A → B entry layer)
+   INVITE TEXT (A → B opener)
 ========================= */
 function getInviteText() {
   const invites = [
@@ -29,8 +35,7 @@ function getInviteText() {
 }
 
 /* =========================
-   SCRIPT ENGINE (A START ONLY)
-   Used ONLY for A initiating flows
+   SCRIPT ENGINE (A INIT ONLY)
 ========================= */
 const scripts = {
   fate: [
@@ -53,15 +58,26 @@ const scripts = {
 
 /* =========================
    B OPTIONS (INVITE ONLY)
-   Used ONLY for first decision (engage or not)
 ========================= */
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 const bOptions = {
-  fate: { yes: [...], no: [...] },
-  reconnect: { yes: [...], no: [...] },
-  date: { yes: [...], no: [...] },
-  dinner: { yes: [...], no: [...] }
+  fate: {
+    yes: ["Let’s see where this goes","Your move","Alright… surprise me"],
+    no: ["Not now… but I’m curious","This isn’t over","Come back to this"]
+  },
+  reconnect: {
+    yes: ["Stay with me","I’m here","Talk to me"],
+    no: ["I see you… just not right now.","I want this… just not in this moment.","Give me a minute"]
+  },
+  date: {
+    yes: ["Come closer","Keep going…","I’m listening"],
+    no: ["Mmm… bad timing. Don’t stop though.","Not now… but I like this.","Try me again later"]
+  },
+  dinner: {
+    yes: ["Fine… I’m in","Pick for me","Let’s do something easy"],
+    no: ["Bad timing… but I like this","Later… don’t lose that energy","Try me again tonight"]
+  }
 };
 
 /* =========================
@@ -75,7 +91,6 @@ function fadeTo(html){
 
 /* =========================
    A FLOW (INITIATOR)
-   A creates and sends the first message
 ========================= */
 function showHome(){
   fadeTo(`
@@ -107,18 +122,23 @@ function startMode(mode){
 }
 
 /* =========================
-   SEND (A ↔ B HANDOFF ENGINE)
-   Builds link + determines direction
+   SEND ENGINE (A ↔ B HANDOFF)
 ========================= */
 function sendChoice(text,mode,nextStep){
 
-  // 🔑 CRITICAL: Determines if this is A sending OR B sending
-  const link = bStep === "1"
-    ? `...?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`
-    : `...?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+  // IMPORTANT: determines direction of flow
+  let link;
+
+  if (bStep === "1") {
+    // B sending → goes back to A RETURN
+    link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`;
+  } else {
+    // A sending → goes to B INVITE
+    link = `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+  }
 
   const inviteText = getInviteText();
-  const full=`${inviteText}\n\n${link}`;
+  const full = `${inviteText}\n\n${link}`;
 
   fadeTo(`
     ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
@@ -131,7 +151,7 @@ function sendChoice(text,mode,nextStep){
    B FLOW
 ========================= */
 
-/* STEP 1A — B engaged (YES path) */
+/* STEP 1A — B ENGAGED (YES PATH) */
 if(bStep === "1"){
   let html = `${debugTag("B • STEP 1A")}`;
   html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
@@ -150,7 +170,7 @@ if(bStep === "1"){
   fadeTo(html);
 }
 
-/* B INVITE — first touch */
+/* B INVITE — FIRST TOUCH */
 else if(msg && !accepted && !bStep){
 
   const pool=bOptions[mode]||bOptions.date;
@@ -171,8 +191,8 @@ else if(msg && !accepted && !bStep){
 }
 
 /* =========================
-   A RETURN (RESPONSE ENGINE)
-   B said something → A reacts based on THAT
+   A RETURN (RESPONSE-DRIVEN)
+   B said something → A reacts
 ========================= */
 else if(msg && accepted){
 
@@ -214,7 +234,7 @@ else if(msg && accepted){
   fadeTo(html);
 }
 
-/* DEFAULT — A HOME */
+/* DEFAULT — BACK TO A */
 else{
   showHome();
 }
@@ -229,3 +249,5 @@ function accept(){
 function goHome(){
   window.location.href="/";
 }
+
+</script>
