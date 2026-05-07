@@ -316,13 +316,17 @@ else if(bStep === "2"){
 /* B INVITE — FIRST TOUCH */
 else if(msg && !accepted && !bStep){
 
+const pool = bOptions[mode] || bOptions.date;
+const yes = pick(pool.yes);
+const no = pick(pool.no);
+  
   fadeTo(`
     ${debugTag("B • INVITE")}
     <div class="hero">${decodeURIComponent(msg)}</div>
 
     <div id="buttons" class="buttons">
-      <button class="button" onclick="accept()">Yes</button>
-      <button class="button" onclick="decline()">No</button>
+<button class="button" onclick="accept()">${yes}</button>
+<button class="button" onclick="decline()">${no}</button>
     </div>
   `);
   
