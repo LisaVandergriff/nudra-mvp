@@ -315,7 +315,34 @@ else if(msg && !accepted && !bStep){
 }
 else if(msg && accepted){
 
-  const options = scripts[mode]?.[Math.min(step-1, scripts[mode].length-1)] || ["…"];
+  const reactions = {
+  "Don’t stop": [
+    "Careful… I might take you up on that.",
+    "You’re asking for trouble.",
+    "I was hoping you’d say that."
+  ],
+  "You’ve got me": [
+    "Good… don’t lose that feeling.",
+    "Then stay right there with me.",
+    "That’s exactly where I wanted you."
+  ],
+  "Alright… now what?": [
+    "Now we see how far this goes.",
+    "Now you don’t get to back out.",
+    "Now it gets interesting."
+  ],
+  "Careful… keep going": [
+    "Careful isn’t really my style.",
+    "You might regret that.",
+    "Or you might love it."
+  ]
+};
+
+const options = reactions[msg] || [
+  "Stay with me.",
+  "Don’t disappear now.",
+  "I’m not done yet."
+];
   let html=`${debugTag("A • RETURN (current)")}<div class="hero">${decodeURIComponent(msg)}</div>`;
   options.forEach(o=>{
     html+=`<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
