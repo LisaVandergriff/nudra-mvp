@@ -257,9 +257,11 @@ function startMode(mode){
 ========================= */
 function sendChoice(text,mode,nextStep){
 
-  const link = bStep === "1"
-  ? `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true`
-  : `https://nudra-mvp.vercel.app/?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}`;
+const nextTurn = (turn === "A") ? "B" : "A";
+
+const link = bStep === "1"
+  ? `?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true&turn=${nextTurn}`
+  : `?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}`;
 
   const inviteText = getInviteText();
   const full=`${inviteText}\n\n${link}`;
@@ -419,11 +421,11 @@ else{
 ========================= */
 
 function accept(){
-  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&bStep=1`;
+  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&bStep=1&turn=${turn}`;
 }
 
 function decline(){
-  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&bStep=2`;
+  window.location.href=`?msg=${encodeURIComponent(msg)}&mode=${mode}&step=${step}&bStep=2&turn=${turn}`;
 }
 
 function goHome(){
