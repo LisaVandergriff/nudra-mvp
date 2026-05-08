@@ -346,11 +346,76 @@ const no = pick(pool.no);
   
 }
 
+/* =========================
+   B LOOP — CONTINUED EXCHANGE
+========================= */
+else if(msg && accepted && turn === "B"){
+
+  let html = `${debugTag("B • LOOP")}<div class="hero">${decodeURIComponent(msg)}</div>`;
+
+  const reactions = {
+    "Stay with me.": [
+      "Then don’t go quiet on me.",
+      "I like where this is.",
+      "Keep that energy."
+    ],
+    "Don’t disappear now.": [
+      "I’m right here.",
+      "You started this…",
+      "So don’t stop."
+    ],
+    "I’m not done yet.": [
+      "Good… neither am I.",
+      "Then prove it.",
+      "I’m listening."
+    ]
+  };
+
+  const options = reactions[msg] || [
+    "Keep going…",
+    "Say that again.",
+    "I’m still here."
+  ];
+
+  options.forEach(o=>{
+    html += `<button class="button" onclick="sendChoice('${o}','${mode}',${step+1})">${o}</button>`;
+  });
+
+  html += `
+  <div style="margin-top:20px; opacity:0.6; font-size:14px; font-family:'Inter', sans-serif;">
+    or say something…
+  </div>
+
+<input id="freeText"
+  placeholder="…"
+  onkeydown="if(event.key==='Enter'){sendFreeText()}"
+  style="
+    width:90%;
+    max-width:320px;
+    margin:10px auto;
+    padding:20px;
+    min-height:60px;
+    font-size:18px;
+    border-radius:999px;
+    border:1px solid rgba(230,210,192,0.25);
+    background:rgba(230,210,192,0.05);
+    color:#E6D2C0;
+    display:block;
+    text-align:center;
+    outline:none;
+  " />
+
+  <button class="button" onclick="sendFreeText()">Continue</button>
+`;
+
+  fadeTo(html);
+}
+  
  /* =========================
    A RETURN - LOOP BACK
   ========================= */  
 
-else if(msg && accepted){
+else if(msg && accepted && turn === "A"){
 
   let html=`${debugTag("A • LOOP")}<div class="hero">${decodeURIComponent(msg)}</div>`;
 
