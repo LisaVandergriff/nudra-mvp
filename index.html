@@ -268,10 +268,10 @@ const link = bStep === "1"
   const full=`${inviteText}\n\n${link}`;
 
   fadeTo(`
-    ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
-    <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-    <button class="button" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(full)}'))">Copy</button>
-  `);
+  ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
+  <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
+  <button class="button" onclick="navigator.clipboard.writeText(${JSON.stringify(full)})">Copy</button>
+`);
 }
 
 /* =========================
