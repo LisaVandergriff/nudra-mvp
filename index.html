@@ -383,7 +383,7 @@ else if(msg && accepted && turn === "B" && loop >= 4){
   const finalLine = pool[Math.floor(Math.random() * pool.length)];
 
   fadeTo(`
-    ${debugTag("B • CLOSE • " + loop)}
+    ${debugTag("B • CLOSE • " + loop + " • " + mode)}
     <div class="hero">${finalLine}</div>
   `);
 }
