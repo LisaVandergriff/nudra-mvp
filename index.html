@@ -150,7 +150,8 @@ const mode = params.get("mode");
 const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 const bStep = params.get("bStep");
-const turn = params.get("turn") || "A";  
+const turn = params.get("turn") || "A"; 
+let currentMessage = "";
 
 /* =========================
    INVITE TEXT (A → B)
@@ -267,11 +268,11 @@ const link = bStep === "1"
   : `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}`;
 
   const inviteText = getInviteText();
-  const full = `${inviteText}\n\n${link}`;
+  currentMessage = `${inviteText}\n\n${link}`;
 
   fadeTo(`
   ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
-  <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
+ <a href="sms:?body=${encodeURIComponent(currentMessage)}" class="button">Send</a>
  <button class="button" onclick="copyText()">Copy</button>
 `);
 }
@@ -446,7 +447,7 @@ function sendFreeText(){
 
 function copyText(){
   const temp = document.createElement('textarea');
-  temp.value = full;
+  temp.value = currentMessage;
   document.body.appendChild(temp);
   temp.select();
   document.execCommand('copy');
