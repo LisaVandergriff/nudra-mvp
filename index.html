@@ -271,7 +271,7 @@ const link = bStep === "1"
   currentMessage = `${inviteText}\n\n${link}`;
 
   fadeTo(`
-  ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
+ ${debugTag(turn === "A" ? "A • SEND" : "B • SEND")}
  <a href="sms:?body=${encodeURIComponent(currentMessage)}" class="button">Send</a>
  <button class="button" onclick="copyText()">Copy</button>
 `);
