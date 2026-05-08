@@ -352,6 +352,43 @@ const no = pick(pool.no);
 }
 
 /* =========================
+   SOFT CLOSE — B ENDS
+========================= */
+else if(msg && accepted && turn === "B" && loop >= 4){
+
+  const endings = {
+    dinner: [
+      "Don’t ruin it… leave it right there.",
+      "We’ll pick this back up.",
+      "That was just enough."
+    ],
+    date: [
+      "Careful… we stop there.",
+      "That’s all you get tonight.",
+      "You can come back for more."
+    ],
+    reconnect: [
+      "Stay in that feeling.",
+      "That felt right… didn’t it.",
+      "We’re good… just like this."
+    ],
+    fate: [
+      "Interesting… let’s not push it.",
+      "That’s where it lands.",
+      "Leave it… exactly there."
+    ]
+  };
+
+  const pool = endings[mode] || endings.dinner;
+  const finalLine = pool[Math.floor(Math.random() * pool.length)];
+
+  fadeTo(`
+    ${debugTag("B • CLOSE • " + loop)}
+    <div class="hero">${finalLine}</div>
+  `);
+}
+  
+/* =========================
    B LOOP — CONTINUED EXCHANGE
 ========================= */
 else if(msg && accepted && turn === "B"){
