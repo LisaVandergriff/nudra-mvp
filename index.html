@@ -374,12 +374,13 @@ options.forEach(o=>{
   </div>
 
   <input id="freeText"
-    placeholder="say something…"
+    placeholder="...."
     style="
       width:90%;
       max-width:320px;
       margin:10px auto;
-      padding:14px;
+      padding:20px;
+      min-height:60px;
       border-radius:999px;
       border:1px solid rgba(230,210,192,0.25);
       background:rgba(230,210,192,0.05);
@@ -389,7 +390,7 @@ options.forEach(o=>{
       outline:none;
     " />
 
-  <button class="button" onclick="sendFreeText()">Send</button>
+  <button class="button" onclick="sendFreeText()">Continue</button>
 `;
 
   fadeTo(html);
