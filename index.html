@@ -293,7 +293,10 @@ if(bStep === "1"){
   fadeTo(html);
 }
 
-/* STEP 1B — NO PATH (SOFT DECLINE) */
+/* =========================
+   STEP 1B — NO PATH (SOFT DECLINE) 
+ ========================= */ 
+  
 else if(bStep === "2"){
   let html = `${debugTag("B • STEP 1B")}`;
   html += `<div class="hero">${decodeURIComponent(msg)}</div>`;
@@ -311,7 +314,10 @@ else if(bStep === "2"){
 fadeTo(html);
 }
 
-/* B INVITE — FIRST TOUCH */
+/* =========================
+   B INVITE — FIRST TOUCH 
+  ========================= */ 
+  
 else if(msg && !accepted && !bStep){
 
 const pool = bOptions[mode] || bOptions.date;
@@ -334,7 +340,9 @@ const no = pick(pool.no);
   
 }
 
-/* A RETURN — LOOP BACK */
+ /* =========================
+   A RETURN - LOOP BACK
+  ========================= */  
 
 else if(msg && accepted){
 
@@ -398,8 +406,10 @@ options.forEach(o=>{
   fadeTo(html);
 }
 
-/* FALLBACK */
-
+/* =========================
+   FALLBACK 
+========================= */
+  
 else{
   showHome();
 }
