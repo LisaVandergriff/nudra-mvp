@@ -272,7 +272,7 @@ const link = bStep === "1"
   fadeTo(`
   ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
   <a href="sms:?body=${encodeURIComponent(full)}" class="button">Send</a>
-  <button class="button" onclick="navigator.clipboard.writeText(full)">Copy</button>
+ <button class="button" onclick="var t=document.createElement('textarea');t.value=full;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);">Copy</button>
 `);
 }
 
