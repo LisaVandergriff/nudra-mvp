@@ -357,27 +357,27 @@ const no = pick(pool.no);
 else if(msg && accepted && turn === "B" && loop >= 4){
 
   const endings = {
-    dinner: [
-      "Don’t ruin it… leave it right there.",
-      "We’ll pick this back up.",
-      "That was just enough."
-    ],
-    date: [
-      "Careful… we stop there.",
-      "That’s all you get tonight.",
-      "You can come back for more."
-    ],
-    reconnect: [
-      "Stay in that feeling.",
-      "That felt right… didn’t it.",
-      "We’re good… just like this."
-    ],
-    fate: [
-      "Interesting… let’s not push it.",
-      "That’s where it lands.",
-      "Leave it… exactly there."
-    ]
-  };
+  dinner: [
+    "Careful… we stop there.",
+    "Don’t say more… just stay there.",
+    "That’s enough to think about."
+  ],
+  date: [
+    "You can come back for that.",
+    "Not all at once…",
+    "Leave it right there."
+  ],
+  reconnect: [
+    "Stay in that feeling…",
+    "Don’t rush it.",
+    "We’re not done… just paused."
+  ],
+  fate: [
+    "Interesting… leave it there.",
+    "That landed exactly how it should.",
+    "Not everything needs more."
+  ]
+};
 
   const pool = endings[mode] || endings.dinner;
   const finalLine = pool[Math.floor(Math.random() * pool.length)];
