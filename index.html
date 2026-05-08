@@ -260,12 +260,14 @@ function sendChoice(text,mode,nextStep){
 
 const nextTurn = (turn === "A") ? "B" : "A";
 
+const base = "https://nudra-mvp.vercel.app";
+
 const link = bStep === "1"
-  ? `?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true&turn=${nextTurn}`
-  : `?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}`;
+  ? `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true&turn=${nextTurn}`
+  : `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}`;
 
   const inviteText = getInviteText();
-  const full=`${inviteText}\n\n${link}`;
+  const full = `${inviteText}\n\n${link}`;
 
   fadeTo(`
   ${debugTag(bStep === "1" ? "B • SEND" : "A • SEND")}
