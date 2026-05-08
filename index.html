@@ -151,6 +151,8 @@ const step = parseInt(params.get("step") || "1");
 const accepted = params.get("accepted");
 const bStep = params.get("bStep");
 const turn = params.get("turn") || "A"; 
+const loop = parseInt(params.get("loop") || "1");
+  loop
 let currentMessage = "";
 
 /* =========================
@@ -260,16 +262,17 @@ function startMode(mode){
 function sendChoice(text,mode,nextStep){
 
 const nextTurn = (turn === "A") ? "B" : "A";
+const nextLoop = loop + 1;  
 
 const base = "https://nudra-mvp.vercel.app";
 
 const isAccepted = accepted === "true" || bStep === "1";
 
 const link = isAccepted
-  ? `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true&turn=${nextTurn}`
-  : `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}`;
-
-  const inviteText = getInviteText();
+  ? `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true&turn=${nextTurn}&loop=${nextLoop}`
+  : `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}&loop=${nextLoop}`;
+  
+const inviteText = getInviteText();
   currentMessage = `${inviteText}\n\n${link}`;
 
   fadeTo(`
