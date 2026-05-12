@@ -31,8 +31,35 @@
     }
     
     #app {
-      transition: opacity 0.4s ease;
-    }
+  transition: opacity 0.4s ease;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.brand-mark {
+  font-size: 20px;
+  color: rgba(230,210,192,0.9);
+  margin-bottom: 14px;
+  text-shadow:
+    0 0 12px rgba(230,210,192,0.35),
+    0 0 30px rgba(230,210,192,0.15);
+}
+
+.brand-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  letter-spacing: 10px;
+  color: #E6D2C0;
+  opacity: 0.92;
+}
+
+h1 {
 
     h1 {
       font-size: clamp(28px, 5vw, 42px);
@@ -230,7 +257,10 @@ function fadeTo(html){
 function showHome(){
   fadeTo(`
     ${debugTag("A • HOME")}
-    <div style="letter-spacing:4px;font-size:14px;">LURRE</div>
+    <div class="brand">
+  <div class="brand-mark">◉</div>
+  <div class="brand-name">LURRE</div>
+</div>
     <h1>Welcome back.<br>Come play with me.</h1>
     <div class="orb" style="opacity:1" onclick="showDirections()"></div>
   `);
