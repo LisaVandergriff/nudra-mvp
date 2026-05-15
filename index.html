@@ -258,9 +258,28 @@ function fadeTo(html){
 }
 
 /* =========================
-   A FLOW (INITIATOR)
+   A Home New
+========================= */  
+function showHomeNew(){
+  fadeTo(`
+    ${debugTag("A • NEW")}
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="lurre-logo.svg" alt="Lurre Logo">
+      </div>
+      <div class="brand-name">LURRE</div>
+    </div>
+
+    <h1>Come a little closer.</h1>
+
+    <div class="orb" style="opacity:1" onclick="showDirections()"></div>
+  `);
+}
+  
+/* =========================
+   A Home WelcomeDone
 ========================= */
-function showHome(){
+function showHomeWelcome(){
   fadeTo(`
     ${debugTag("A • HOME")}
     <div class="brand">
@@ -562,7 +581,7 @@ options.forEach(o=>{
 ========================= */
   
 else{
-  showHome();
+  showHomeWelcome();
 }
 
 /* =========================
