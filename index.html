@@ -272,7 +272,7 @@ function showHomeNew(){
 
     <h1>Come a little closer.</h1>
 
-    <div class="orb" style="opacity:1" onclick="showDirections()"></div>
+    <div class="orb" style="opacity:1" onclick="showAPartner()"></div>
   `);
 }
   
@@ -293,6 +293,40 @@ function showHomeWelcome(){
   `);
 }
 
+/* =========================
+   A Partner onboarding screen
+========================= */
+function showAPartner(){
+  fadeTo(`
+    ${debugTag("A • PARTNER")}
+
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="lurre-logo.svg" alt="Lurre Logo">
+      </div>
+      <div class="brand-name">LURRE</div>
+    </div>
+
+    <h1>What should they call you?</h1>
+
+    <div class="form-group">
+      <input type="text" placeholder="First Name">
+    </div>
+
+    <div class="form-group">
+      <input type="tel" placeholder="Phone Number">
+    </div>
+
+    <div class="form-group">
+      <input type="email" placeholder="Email">
+    </div>
+
+    <button class="button" onclick="showBPartner()">
+      Continue
+    </button>
+  `);
+}
+  
 function showDirections(){
   fadeTo(`
     ${debugTag("A • STEP 1")}
