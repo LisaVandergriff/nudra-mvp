@@ -351,6 +351,40 @@ function showAPartner(){
     </button>
   `);
 }
+
+/* =========================
+   B Partner onboarding screen
+========================= */
+function showBPartner(){
+  fadeTo(`
+    ${debugTag("B • PARTNER")}
+
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="lurre-logo.svg" alt="Lurre Logo">
+      </div>
+      <div class="brand-name">LURRE</div>
+    </div>
+
+    <h1>Who waits on the other side?</h1>
+
+    <div class="form-group">
+      <input type="text" placeholder="First Name">
+    </div>
+
+    <div class="form-group">
+      <input type="tel" placeholder="Phone Number">
+    </div>
+
+    <div class="form-group">
+      <input type="email" placeholder="Email">
+    </div>
+
+    <button class="button" onclick="showInviteIntro()">
+      Continue
+    </button>
+  `);
+}
   
 function showDirections(){
   fadeTo(`
