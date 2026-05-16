@@ -385,7 +385,44 @@ function showBPartner(){
     </button>
   `);
 }
-  
+
+/* =========================
+   B Invite Intro
+========================= */
+function showInviteIntro(){
+  fadeTo(`
+    ${debugTag("B • INVITE INTRO")}
+
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="lurre-logo.svg" alt="Lurre Logo">
+      </div>
+      <div class="brand-name">LURRE</div>
+    </div>
+
+    <h1>(A Name) is luring you in.</h1>
+
+    <div style="
+      max-width:420px;
+      margin:0 auto 30px;
+      font-family:'Inter', sans-serif;
+      font-size:16px;
+      line-height:1.7;
+      color:rgba(230,210,192,0.82);
+    ">
+      A private space for playful tension,
+      emotional connection,
+      and the occasional dangerous idea.
+      <br><br>
+      By continuing, you agree to receive ongoing
+      messages and interactions from your chosen partner.
+    </div>
+
+    <button class="button" onclick="showHomeWelcome()">
+      Continue
+    </button>
+  `);
+}  
 function showDirections(){
   fadeTo(`
     ${debugTag("A • STEP 1")}
