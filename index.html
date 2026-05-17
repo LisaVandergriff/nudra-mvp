@@ -518,25 +518,8 @@ fadeTo(html);
   ========================= */ 
   
 else if(invite === "true" && msg && !accepted && !bStep){
+  showInviteIntro();
 
-const pool = bOptions[mode] || bOptions.date;
-const yes = pick(pool.yes);
-const no = pick(pool.no);
-  
-  fadeTo(`
-    ${debugTag("B • INVITE")}
-    <div class="hero">${decodeURIComponent(msg)}</div>
-
-    <div id="buttons" class="buttons">
-<button class="button" onclick="accept()">${yes}</button>
-<button class="button" onclick="decline()">${no}</button>
-    </div>
-  `);
-  
-  setTimeout(()=>{
-  document.getElementById("buttons").style.opacity = 1;
-}, 200);
-  
 }
 
 /* =========================
