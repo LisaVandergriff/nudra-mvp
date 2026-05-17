@@ -516,7 +516,7 @@ fadeTo(html);
    B INVITE — FIRST TOUCH 
   ========================= */ 
   
-else if(msg && !accepted && !bStep){
+else if(invite === "true" && msg && !accepted && !bStep){
 
 const pool = bOptions[mode] || bOptions.date;
 const yes = pick(pool.yes);
