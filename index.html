@@ -458,7 +458,7 @@ const isAccepted = accepted === "true" || bStep === "1";
 
 const link = isAccepted
   ? `${base}?msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&accepted=true&turn=${nextTurn}&loop=${nextLoop}`
-    : `${base}?invite=true&msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}&loop=${nextLoop}';
+   : `${base}?invite=true&msg=${encodeURIComponent(text)}&mode=${mode}&step=${nextStep}&turn=${nextTurn}&loop=${nextLoop}`;
   
 const inviteText = getInviteText();
   currentMessage = `${inviteText}\n\n${link}`;
