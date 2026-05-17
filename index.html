@@ -717,34 +717,34 @@ function goHome(){
 function sendFreeText(){
   const input = document.getElementById("freeText");
   const text = input.value.trim();
-  
+
   if(!text){
 
-  let warning = document.getElementById("inputWarning");
+    let warning = document.getElementById("inputWarning");
 
-  if(!warning){
-    warning = document.createElement("div");
-    warning.id = "inputWarning";
+    if(!warning){
+      warning = document.createElement("div");
+      warning.id = "inputWarning";
 
-    warning.innerText = "Choose a response or say something…";
+      warning.innerText = "Choose a response or say something…";
 
-    warning.style.marginTop = "14px";
-    warning.style.fontSize = "14px";
-    warning.style.fontFamily = "'Inter', sans-serif";
-    warning.style.color = "rgba(230,210,192,0.55)";
-    warning.style.opacity = "0";
-    warning.style.transition = "opacity 0.4s ease";
+      warning.style.marginTop = "14px";
+      warning.style.fontSize = "14px";
+      warning.style.fontFamily = "'Inter', sans-serif";
+      warning.style.color = "rgba(230,210,192,0.55)";
+      warning.style.opacity = "0";
+      warning.style.transition = "opacity 0.4s ease";
 
-    input.parentNode.insertBefore(warning, input.nextSibling);
+      input.parentNode.insertBefore(warning, input.nextSibling);
 
-    setTimeout(()=>{
-      warning.style.opacity = "1";
-    },10);
+      setTimeout(()=>{
+        warning.style.opacity = "1";
+      },10);
+    }
+
+    return;
   }
 
-  return;
-}c
-  
   sendChoice(text, mode, step+1);
 }
 
